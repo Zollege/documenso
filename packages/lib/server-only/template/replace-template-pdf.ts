@@ -5,7 +5,7 @@ import { prisma } from '@documenso/prisma';
 
 import { AppError, AppErrorCode } from '../../errors/app-error';
 import { getFileServerSide } from '../../universal/upload/get-file.server';
-import type { RequestMetadata } from '../../universal/extract-request-metadata';
+import type { ApiRequestMetadata } from '../../universal/extract-request-metadata';
 import type { EnvelopeIdOptions } from '../../utils/envelope';
 import { getTemplateById } from './get-template-by-id';
 
@@ -14,7 +14,7 @@ export type ReplaceTemplatePdfOptions = {
   userId: number;
   teamId: number;
   newDocumentDataId: string;
-  requestMetadata?: RequestMetadata;
+  requestMetadata: ApiRequestMetadata;
 };
 
 /**
@@ -61,13 +61,13 @@ export const replaceTemplatePdf = async ({
   const [oldPdf, newPdf] = await Promise.all([
     PDFDocument.load(oldPdfBuffer).catch((e) => {
       console.error(`Old PDF load error: ${e.message}`);
-      throw new AppError(AppErrorCode.INVALID_DOCUMENT_FILE, {
+      throw new AppError(AppErrorCode.INVALID_REQUEST, {
         message: 'Failed to load old PDF',
       });
     }),
     PDFDocument.load(newPdfBuffer).catch((e) => {
       console.error(`New PDF load error: ${e.message}`);
-      throw new AppError(AppErrorCode.INVALID_DOCUMENT_FILE, {
+      throw new AppError(AppErrorCode.INVALID_REQUEST, {
         message: 'Failed to load new PDF',
       });
     }),
@@ -77,7 +77,7 @@ export const replaceTemplatePdf = async ({
   const newPageCount = newPdf.getPageCount();
 
   if (oldPageCount !== newPageCount) {
-    throw new AppError(AppErrorCode.INVALID_DOCUMENT_FILE, {
+    throw new AppError(AppErrorCode.INVALID_REQUEST, {
       message: `Page count mismatch: old PDF has ${oldPageCount} pages, new PDF has ${newPageCount} pages. The new PDF must have the same number of pages to keep fields on the correct pages.`,
     });
   }
