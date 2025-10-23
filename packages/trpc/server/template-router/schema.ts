@@ -257,7 +257,18 @@ export const ZBulkSendTemplateMutationSchema = z.object({
   sendImmediately: z.boolean(),
 });
 
+export const ZReplaceTemplatePdfRequestSchema = z.object({
+  templateId: z.number(),
+  newDocumentDataId: z
+    .string()
+    .min(1)
+    .describe('The ID of the new document data to replace the template PDF with.'),
+});
+
+export const ZReplaceTemplatePdfResponseSchema = ZTemplateSchema;
+
 export type TCreateTemplateMutationSchema = z.infer<typeof ZCreateTemplateMutationSchema>;
 export type TDuplicateTemplateMutationSchema = z.infer<typeof ZDuplicateTemplateMutationSchema>;
 export type TDeleteTemplateMutationSchema = z.infer<typeof ZDeleteTemplateMutationSchema>;
 export type TBulkSendTemplateMutationSchema = z.infer<typeof ZBulkSendTemplateMutationSchema>;
+export type TReplaceTemplatePdfRequestSchema = z.infer<typeof ZReplaceTemplatePdfRequestSchema>;
