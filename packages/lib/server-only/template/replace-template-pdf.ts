@@ -17,10 +17,20 @@ export type ReplaceTemplatePdfOptions = {
   requestMetadata: ApiRequestMetadata;
 };
 
+export type ReplaceTemplatePdfResult = {
+  template: Awaited<ReturnType<typeof getTemplateById>>;
+  oldPageCount: number;
+  newPageCount: number;
+  deletedFieldsCount: number;
+};
+
 /**
  * Replace the PDF of a template with a new one.
- * Validates that the new PDF has the same number of pages as the old one
- * to ensure all fields remain on the correct pages.
+ *
+ * Behavior:
+ * - If new PDF has more pages: New pages will have no fields
+ * - If new PDF has fewer pages: Fields on removed pages will be deleted
+ * - If same page count: No field changes
  */
 export const replaceTemplatePdf = async ({
   id,
@@ -28,7 +38,7 @@ export const replaceTemplatePdf = async ({
   teamId,
   newDocumentDataId,
   requestMetadata,
-}: ReplaceTemplatePdfOptions) => {
+}: ReplaceTemplatePdfOptions): Promise<ReplaceTemplatePdfResult> => {
   // Get the template and verify access
   const template = await getTemplateById({
     id,
@@ -76,10 +86,39 @@ export const replaceTemplatePdf = async ({
   const oldPageCount = oldPdf.getPageCount();
   const newPageCount = newPdf.getPageCount();
 
-  if (oldPageCount !== newPageCount) {
-    throw new AppError(AppErrorCode.INVALID_REQUEST, {
-      message: `Page count mismatch: old PDF has ${oldPageCount} pages, new PDF has ${newPageCount} pages. The new PDF must have the same number of pages to keep fields on the correct pages.`,
+  let deletedFieldsCount = 0;
+
+  // If new PDF has fewer pages, delete fields that are on removed pages
+  if (newPageCount < oldPageCount) {
+    const fieldsToDelete = await prisma.field.findMany({
+      where: {
+        envelopeId: template.envelopeId,
+        page: {
+          gt: newPageCount,
+        },
+      },
+      select: {
+        id: true,
+        page: true,
+        type: true,
+      },
     });
+
+    if (fieldsToDelete.length > 0) {
+      const deleteResult = await prisma.field.deleteMany({
+        where: {
+          id: {
+            in: fieldsToDelete.map((f) => f.id),
+          },
+        },
+      });
+
+      deletedFieldsCount = deleteResult.count;
+
+      console.log(
+        `Deleted ${deletedFieldsCount} fields from pages ${newPageCount + 1}-${oldPageCount}`,
+      );
+    }
   }
 
   // Update the envelope item to point to the new document data
@@ -92,12 +131,19 @@ export const replaceTemplatePdf = async ({
     },
   });
 
-  // Return the updated template
-  return await getTemplateById({
+  // Return the updated template with operation details
+  const updatedTemplate = await getTemplateById({
     id,
     userId,
     teamId,
   });
+
+  return {
+    template: updatedTemplate,
+    oldPageCount,
+    newPageCount,
+    deletedFieldsCount,
+  };
 };
 
 /**

@@ -58,16 +58,36 @@ export const ReplaceTemplatePdf = ({ templateId, onSuccess }: ReplaceTemplatePdf
       const newDocumentDataId = uploadResult.id;
 
       // Step 2: Call the replacePdf mutation
-      await replacePdf({
+      const result = await replacePdf({
         templateId,
         newDocumentDataId,
       });
 
+      // Build success message based on what happened
+      let description = '';
+      if (result.newPageCount > result.oldPageCount) {
+        const addedPages = result.newPageCount - result.oldPageCount;
+        description = _(
+          msg`PDF replaced successfully. Added ${addedPages} page(s). New pages have no fields.`,
+        );
+      } else if (result.newPageCount < result.oldPageCount) {
+        const removedPages = result.oldPageCount - result.newPageCount;
+        if (result.deletedFieldsCount > 0) {
+          description = _(
+            msg`PDF replaced successfully. Removed ${removedPages} page(s) and deleted ${result.deletedFieldsCount} field(s) that were on those pages.`,
+          );
+        } else {
+          description = _(
+            msg`PDF replaced successfully. Removed ${removedPages} page(s). No fields were affected.`,
+          );
+        }
+      } else {
+        description = _(msg`PDF replaced successfully. All fields remain on the same pages.`);
+      }
+
       toast({
         title: _(msg`PDF replaced successfully`),
-        description: _(
-          msg`The template PDF has been replaced. All fields remain on the same pages.`,
-        ),
+        description,
         duration: 5000,
       });
 
@@ -101,8 +121,8 @@ export const ReplaceTemplatePdf = ({ templateId, onSuccess }: ReplaceTemplatePdf
           </h3>
           <p className="text-muted-foreground text-xs">
             <Trans>
-              Upload a new PDF to replace the current one. The new PDF must have the same number of
-              pages.
+              Upload a new PDF to replace the current one. If the new PDF has fewer pages, fields
+              on removed pages will be deleted.
             </Trans>
           </p>
         </div>

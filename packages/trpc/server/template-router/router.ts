@@ -344,7 +344,7 @@ export const templateRouter = router({
         path: '/template/replace-pdf',
         summary: 'Replace template PDF',
         description:
-          'Replace the PDF of a template with a new one. The new PDF must have the same number of pages as the old one to ensure all fields remain on the correct pages.',
+          'Replace the PDF of a template with a new one. If the new PDF has more pages, new pages will have no fields. If it has fewer pages, fields on removed pages will be deleted. Returns information about page changes and deleted fields.',
         tags: ['Template'],
       },
     })
