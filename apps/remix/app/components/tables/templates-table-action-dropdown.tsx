@@ -18,7 +18,7 @@ import { Link } from 'react-router';
 
 import { downloadPDF } from '@documenso/lib/client-only/download-pdf';
 import { useSession } from '@documenso/lib/client-only/providers/session';
-import { trpc as trpcClient } from '@documenso/trpc/client';
+import { trpc } from '@documenso/trpc/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,6 +60,8 @@ export const TemplatesTableActionDropdown = ({
   const { user } = useSession();
   const { toast } = useToast();
 
+  const utils = trpc.useUtils();
+
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDuplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
   const [isMoveToFolderDialogOpen, setMoveToFolderDialogOpen] = useState(false);
@@ -71,7 +73,7 @@ export const TemplatesTableActionDropdown = ({
 
   const onDownloadClick = async () => {
     try {
-      const template = await trpcClient.template.getTemplateById.query({
+      const template = await utils.template.getTemplateById.fetch({
         templateId: row.id,
       });
 
