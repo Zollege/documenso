@@ -20,6 +20,7 @@ import { deleteTemplate } from '@documenso/lib/server-only/template/delete-templ
 import { deleteTemplateDirectLink } from '@documenso/lib/server-only/template/delete-template-direct-link';
 import { findTemplates } from '@documenso/lib/server-only/template/find-templates';
 import { getTemplateById } from '@documenso/lib/server-only/template/get-template-by-id';
+import { replaceTemplatePdf } from '@documenso/lib/server-only/template/replace-template-pdf';
 import { toggleTemplateDirectLink } from '@documenso/lib/server-only/template/toggle-template-direct-link';
 import { getPresignPostUrl } from '@documenso/lib/universal/upload/server-actions';
 import { mapSecondaryIdToTemplateId } from '@documenso/lib/utils/envelope';
@@ -48,6 +49,8 @@ import {
   ZFindTemplatesResponseSchema,
   ZGetTemplateByIdRequestSchema,
   ZGetTemplateByIdResponseSchema,
+  ZReplaceTemplatePdfRequestSchema,
+  ZReplaceTemplatePdfResponseSchema,
   ZToggleTemplateDirectLinkRequestSchema,
   ZToggleTemplateDirectLinkResponseSchema,
   ZUpdateTemplateRequestSchema,
@@ -329,6 +332,45 @@ export const templateRouter = router({
       });
 
       return mapEnvelopeToTemplateLite(envelope);
+    }),
+
+  /**
+   * @public
+   */
+  replacePdf: authenticatedProcedure
+    .meta({
+      openapi: {
+        method: 'POST',
+        path: '/template/replace-pdf',
+        summary: 'Replace template PDF',
+        description:
+          'Replace the PDF of a template with a new one. If the new PDF has more pages, new pages will have no fields. If it has fewer pages, fields on removed pages will be deleted. Returns information about page changes and deleted fields.',
+        tags: ['Template'],
+      },
+    })
+    .input(ZReplaceTemplatePdfRequestSchema)
+    .output(ZReplaceTemplatePdfResponseSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { teamId } = ctx;
+      const { templateId, newDocumentDataId } = input;
+
+      ctx.logger.info({
+        input: {
+          templateId,
+          newDocumentDataId,
+        },
+      });
+
+      return await replaceTemplatePdf({
+        id: {
+          type: 'templateId',
+          id: templateId,
+        },
+        userId: ctx.user.id,
+        teamId,
+        newDocumentDataId,
+        requestMetadata: ctx.metadata,
+      });
     }),
 
   /**
