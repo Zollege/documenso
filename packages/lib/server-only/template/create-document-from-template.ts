@@ -694,7 +694,10 @@ export const createDocumentFromTemplate = async ({
             envelopeId: envelope.id,
             metadata: {
               ...requestMetadata,
-              ipAddress: undefined, // No IP for auto-signed fields
+              requestMetadata: {
+                ...requestMetadata.requestMetadata,
+                ipAddress: undefined, // No IP for auto-signed fields
+              },
             },
             data: {
               recipientEmail: field.recipient.email,
