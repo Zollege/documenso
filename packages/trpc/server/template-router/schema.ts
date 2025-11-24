@@ -257,7 +257,25 @@ export const ZBulkSendTemplateMutationSchema = z.object({
   sendImmediately: z.boolean(),
 });
 
+export const ZReplaceTemplatePdfRequestSchema = z.object({
+  templateId: z.number(),
+  newDocumentDataId: z
+    .string()
+    .min(1)
+    .describe('The ID of the new document data to replace the template PDF with.'),
+});
+
+export const ZReplaceTemplatePdfResponseSchema = z.object({
+  template: ZTemplateSchema,
+  oldPageCount: z.number().describe('The number of pages in the old PDF.'),
+  newPageCount: z.number().describe('The number of pages in the new PDF.'),
+  deletedFieldsCount: z
+    .number()
+    .describe('The number of fields that were deleted (if the new PDF has fewer pages).'),
+});
+
 export type TCreateTemplateMutationSchema = z.infer<typeof ZCreateTemplateMutationSchema>;
 export type TDuplicateTemplateMutationSchema = z.infer<typeof ZDuplicateTemplateMutationSchema>;
 export type TDeleteTemplateMutationSchema = z.infer<typeof ZDeleteTemplateMutationSchema>;
 export type TBulkSendTemplateMutationSchema = z.infer<typeof ZBulkSendTemplateMutationSchema>;
+export type TReplaceTemplatePdfRequestSchema = z.infer<typeof ZReplaceTemplatePdfRequestSchema>;
