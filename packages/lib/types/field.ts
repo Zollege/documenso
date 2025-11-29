@@ -41,6 +41,7 @@ export const ZFieldSchema = FieldSchema.pick({
   height: true,
   customText: true,
   inserted: true,
+  autosign: true,
   fieldMeta: true,
 }).extend({
   // Backwards compatibility.
