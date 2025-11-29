@@ -43,6 +43,7 @@ import {
 import type { ApiRequestMetadata } from '../../universal/extract-request-metadata';
 import { getFileServerSide } from '../../universal/upload/get-file.server';
 import { putPdfFileServerSide } from '../../universal/upload/put-file.server';
+import { fieldsContainUnsignedRequiredField } from '../../utils/advanced-fields-helpers';
 import { extractDerivedDocumentMeta } from '../../utils/document';
 import { createDocumentAuditLogData } from '../../utils/document-audit-logs';
 import {
@@ -711,6 +712,9 @@ export const createDocumentFromTemplate = async ({
         })),
       });
 
+      // Track recipients that have auto-signed fields
+      const recipientsWithAutoSignedFields = new Set<number>();
+
       // Auto-sign each field
       for (const field of createdFields) {
         console.log('[DEBUG] Processing auto-sign for field:', {
@@ -719,6 +723,8 @@ export const createDocumentFromTemplate = async ({
           recipientName: field.recipient.name,
           recipientEmail: field.recipient.email,
         });
+
+        recipientsWithAutoSignedFields.add(field.recipientId);
 
         // For signature fields, create a signature entry
         if (field.type === 'SIGNATURE' || field.type === 'FREE_SIGNATURE') {
@@ -765,6 +771,78 @@ export const createDocumentFromTemplate = async ({
           }),
         });
         console.log('[DEBUG] Created audit log for field:', field.id);
+      }
+
+      // Check if any recipients should now be marked as SIGNED
+      for (const recipientId of recipientsWithAutoSignedFields) {
+        const recipient = envelope.recipients.find((r) => r.id === recipientId);
+        if (!recipient) continue;
+
+        console.log('[DEBUG] Checking recipient completion:', {
+          recipientId,
+          recipientEmail: recipient.email,
+          currentStatus: recipient.signingStatus,
+        });
+
+        // Get all fields for this recipient to check if they're all filled
+        const recipientFields = await tx.field.findMany({
+          where: {
+            envelopeId: envelope.id,
+            recipientId: recipientId,
+          },
+        });
+
+        console.log('[DEBUG] Recipient fields:', {
+          recipientId,
+          totalFields: recipientFields.length,
+          insertedFields: recipientFields.filter((f) => f.inserted).length,
+        });
+
+        // Check if all required fields are now inserted
+        const hasUnsignedRequiredFields = fieldsContainUnsignedRequiredField(recipientFields);
+
+        console.log('[DEBUG] Has unsigned required fields:', hasUnsignedRequiredFields);
+
+        if (!hasUnsignedRequiredFields && recipient.signingStatus !== SigningStatus.SIGNED) {
+          // Mark recipient as signed
+          await tx.recipient.update({
+            where: { id: recipientId },
+            data: {
+              signingStatus: SigningStatus.SIGNED,
+              signedAt: new Date(),
+            },
+          });
+
+          console.log('[DEBUG] Marked recipient as SIGNED:', recipientId);
+
+          // Create audit log for recipient completion
+          await tx.documentAuditLog.create({
+            data: createDocumentAuditLogData({
+              type: DOCUMENT_AUDIT_LOG_TYPE.DOCUMENT_RECIPIENT_COMPLETED,
+              envelopeId: envelope.id,
+              user: {
+                name: recipient.name,
+                email: recipient.email,
+              },
+              metadata: {
+                ...requestMetadata,
+                requestMetadata: {
+                  ...requestMetadata.requestMetadata,
+                  ipAddress: undefined, // No IP for auto-signed recipients
+                },
+              },
+              data: {
+                recipientEmail: recipient.email,
+                recipientName: recipient.name,
+                recipientId: recipient.id,
+                recipientRole: recipient.role,
+                actionAuth: [], // Auto-signed, no action auth required
+              },
+            }),
+          });
+
+          console.log('[DEBUG] Created recipient completion audit log');
+        }
       }
     }
 
