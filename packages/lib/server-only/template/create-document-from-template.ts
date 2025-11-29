@@ -308,7 +308,25 @@ export const createDocumentFromTemplate = async ({
     include: {
       recipients: {
         include: {
-          fields: true,
+          fields: {
+            select: {
+              id: true,
+              envelopeId: true,
+              envelopeItemId: true,
+              recipientId: true,
+              type: true,
+              page: true,
+              positionX: true,
+              positionY: true,
+              width: true,
+              height: true,
+              customText: true,
+              inserted: true,
+              autosign: true,
+              fieldMeta: true,
+              secondaryId: true,
+            },
+          },
         },
       },
       envelopeItems: {
