@@ -701,17 +701,35 @@ export const createDocumentFromTemplate = async ({
         },
       });
 
+      console.log('[DEBUG] Created fields found in database:', {
+        count: createdFields.length,
+        fields: createdFields.map((f) => ({
+          id: f.id,
+          type: f.type,
+          autosign: f.autosign,
+          recipientId: f.recipientId,
+        })),
+      });
+
       // Auto-sign each field
       for (const field of createdFields) {
+        console.log('[DEBUG] Processing auto-sign for field:', {
+          id: field.id,
+          type: field.type,
+          recipientName: field.recipient.name,
+          recipientEmail: field.recipient.email,
+        });
+
         // For signature fields, create a signature entry
         if (field.type === 'SIGNATURE' || field.type === 'FREE_SIGNATURE') {
-          await tx.signature.create({
+          const signature = await tx.signature.create({
             data: {
               fieldId: field.id,
               recipientId: field.recipientId,
               typedSignature: `${field.recipient.name || field.recipient.email} (Auto-signed)`,
             },
           });
+          console.log('[DEBUG] Created signature:', signature.id);
         }
 
         // Mark field as inserted
@@ -719,6 +737,7 @@ export const createDocumentFromTemplate = async ({
           where: { id: field.id },
           data: { inserted: true },
         });
+        console.log('[DEBUG] Marked field as inserted:', field.id);
 
         // Create audit log for auto-signed field (without IP address)
         await tx.documentAuditLog.create({
@@ -745,6 +764,7 @@ export const createDocumentFromTemplate = async ({
             },
           }),
         });
+        console.log('[DEBUG] Created audit log for field:', field.id);
       }
     }
 
