@@ -597,6 +597,12 @@ export const createDocumentFromTemplate = async ({
         fields.map((field) => {
           const prefillField = prefillFields?.find((value) => value.id === field.id);
 
+          console.log('[DEBUG] Template field autosign value:', {
+            fieldId: field.id,
+            fieldType: field.type,
+            autosign: field.autosign,
+          });
+
           const payload = {
             envelopeItemId: oldEnvelopeItemToNewEnvelopeItemIdMap[field.envelopeItemId],
             envelopeId: envelope.id,
@@ -655,6 +661,15 @@ export const createDocumentFromTemplate = async ({
 
     // Handle auto-signing for fields marked with autosign=true
     const autoSignFields = fieldsToCreate.filter((field) => field.autosign);
+
+    console.log('[DEBUG] Auto-sign fields to process:', {
+      totalFields: fieldsToCreate.length,
+      autoSignFieldsCount: autoSignFields.length,
+      autoSignFields: autoSignFields.map((f) => ({
+        type: f.type,
+        autosign: f.autosign,
+      })),
+    });
 
     if (autoSignFields.length > 0) {
       // Get the created fields to get their IDs
