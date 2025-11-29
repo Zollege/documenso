@@ -265,7 +265,13 @@ export const sendDocument = async ({
                 name: recipient.name,
                 email: recipient.email,
               },
-              requestMetadata,
+              metadata: {
+                ...requestMetadata,
+                requestMetadata: {
+                  ...requestMetadata.requestMetadata,
+                  ipAddress: undefined, // No IP for auto-signed recipients
+                },
+              },
               data: {
                 recipientEmail: recipient.email,
                 recipientName: recipient.name,
