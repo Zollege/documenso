@@ -732,7 +732,7 @@ export const createDocumentFromTemplate = async ({
             data: {
               fieldId: field.id,
               recipientId: field.recipientId,
-              typedSignature: `${field.recipient.name || field.recipient.email} (Auto-signed)`,
+              typedSignature: field.recipient.name || field.recipient.email,
             },
           });
           console.log('[DEBUG] Created signature:', signature.id);
@@ -765,7 +765,7 @@ export const createDocumentFromTemplate = async ({
               fieldId: field.secondaryId,
               field: {
                 type: field.type,
-                data: `${field.recipient.name || field.recipient.email} (Auto-signed)`,
+                data: field.recipient.name || field.recipient.email,
               },
             },
           }),
