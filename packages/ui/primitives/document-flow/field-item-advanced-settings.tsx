@@ -66,8 +66,11 @@ export type FieldMetaKeys =
   | keyof EmailFieldMeta
   | keyof DateFieldMeta;
 
-const getDefaultState = (fieldType: FieldType): FieldMeta => {
+const getDefaultState = (fieldType: FieldType): FieldMeta | null => {
   switch (fieldType) {
+    case FieldType.SIGNATURE:
+    case FieldType.FREE_SIGNATURE:
+      return null;
     case FieldType.INITIALS:
       return {
         type: 'initials',
@@ -173,21 +176,23 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
 
     const localStorageKey = `field_${field.formId}_${field.type}`;
 
-    const defaultState: FieldMeta = getDefaultState(field.type);
+    const defaultState: FieldMeta | null = getDefaultState(field.type);
 
-    const [fieldState, setFieldState] = useState(() => {
+    const [fieldState, setFieldState] = useState<FieldMeta | null>(() => {
       const savedState = localStorage.getItem(localStorageKey);
-      return savedState ? { ...defaultState, ...JSON.parse(savedState) } : defaultState;
+      if (savedState) {
+        return defaultState ? { ...defaultState, ...JSON.parse(savedState) } : JSON.parse(savedState);
+      }
+      return defaultState;
     });
 
     useEffect(() => {
       if (fieldMeta && typeof fieldMeta === 'object') {
         const parsedFieldMeta = ZFieldMetaSchema.parse(fieldMeta);
 
-        setFieldState({
-          ...defaultState,
-          ...parsedFieldMeta,
-        });
+        setFieldState(
+          defaultState ? { ...defaultState, ...parsedFieldMeta } : parsedFieldMeta,
+        );
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fieldMeta]);
@@ -219,7 +224,11 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
         | boolean
         | number,
     ) => {
-      setFieldState((prevState: FieldMeta) => {
+      setFieldState((prevState: FieldMeta | null) => {
+        if (!prevState) {
+          return prevState;
+        }
+
         if (
           ['characterLimit', 'minValue', 'maxValue', 'validationLength', 'fontSize'].includes(key)
         ) {
@@ -248,7 +257,7 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
           // For signature fields, save autosign setting
           if (field.type === FieldType.SIGNATURE || field.type === FieldType.FREE_SIGNATURE) {
             onAutosignSave?.(autosign);
-          } else {
+          } else if (fieldState) {
             onSave?.(fieldState);
           }
 
