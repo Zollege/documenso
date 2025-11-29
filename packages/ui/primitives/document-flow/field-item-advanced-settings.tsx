@@ -296,28 +296,28 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
           {match(field.type)
             .with(FieldType.INITIALS, () => (
               <InitialsFieldAdvancedSettings
-                fieldState={fieldState!}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.NAME, () => (
               <NameFieldAdvancedSettings
-                fieldState={fieldState!}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.EMAIL, () => (
               <EmailFieldAdvancedSettings
-                fieldState={fieldState!}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.DATE, () => (
               <DateFieldAdvancedSettings
-                fieldState={fieldState!}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
@@ -325,35 +325,35 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
 
             .with(FieldType.TEXT, () => (
               <TextFieldAdvancedSettings
-                fieldState={fieldState!}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.NUMBER, () => (
               <NumberFieldAdvancedSettings
-                fieldState={fieldState!}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.RADIO, () => (
               <RadioFieldAdvancedSettings
-                fieldState={fieldState!}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.CHECKBOX, () => (
               <CheckboxFieldAdvancedSettings
-                fieldState={fieldState!}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.DROPDOWN, () => (
               <DropdownFieldAdvancedSettings
-                fieldState={fieldState!}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
