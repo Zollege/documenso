@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE "Field" ADD COLUMN     "autosign" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Field" ADD COLUMN     "autosign" BOOLEAN DEFAULT false;
