@@ -186,6 +186,11 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
       return defaultState;
     });
 
+    // Update autosign state when field changes
+    useEffect(() => {
+      setAutosign(field.autosign ?? false);
+    }, [field.autosign]);
+
     useEffect(() => {
       if (fieldMeta && typeof fieldMeta === 'object') {
         const parsedFieldMeta = ZFieldMetaSchema.parse(fieldMeta);
