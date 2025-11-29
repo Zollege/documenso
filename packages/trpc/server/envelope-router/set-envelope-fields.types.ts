@@ -41,6 +41,7 @@ export const ZSetEnvelopeFieldsRequestSchema = z.object({
         .max(100)
         .describe('The percentage based height of the field on the envelope.'),
       fieldMeta: ZFieldMetaSchema, // Todo: Envelopes - Use a more strict form?
+      autosign: z.boolean().optional(),
     }),
   ),
 });
