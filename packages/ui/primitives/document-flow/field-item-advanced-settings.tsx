@@ -191,7 +191,7 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
         const parsedFieldMeta = ZFieldMetaSchema.parse(fieldMeta);
 
         setFieldState(
-          defaultState ? { ...defaultState, ...parsedFieldMeta } : parsedFieldMeta,
+          (defaultState ? { ...defaultState, ...parsedFieldMeta } : parsedFieldMeta) as FieldMeta,
         );
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,7 +200,7 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
     const { scheduleSave } = useAutoSave(onAutoSave || (async () => {}));
 
     const handleAutoSave = () => {
-      if (errors.length === 0) {
+      if (errors.length === 0 && fieldState) {
         scheduleSave(fieldState);
       }
     };
@@ -296,28 +296,28 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
           {match(field.type)
             .with(FieldType.INITIALS, () => (
               <InitialsFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState!}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.NAME, () => (
               <NameFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState!}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.EMAIL, () => (
               <EmailFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState!}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.DATE, () => (
               <DateFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState!}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
@@ -325,35 +325,35 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
 
             .with(FieldType.TEXT, () => (
               <TextFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState!}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.NUMBER, () => (
               <NumberFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState!}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.RADIO, () => (
               <RadioFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState!}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.CHECKBOX, () => (
               <CheckboxFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState!}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.DROPDOWN, () => (
               <DropdownFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState!}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
