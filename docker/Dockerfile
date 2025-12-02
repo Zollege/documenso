@@ -4,6 +4,7 @@
 FROM node:22-alpine3.20 AS base
 
 RUN apk add --no-cache openssl
+RUN apk add --no-cache font-freefont
 
 
 ###########################
@@ -49,6 +50,13 @@ ENV NEXT_PRIVATE_ENCRYPTION_KEY="$NEXT_PRIVATE_ENCRYPTION_KEY"
 ARG NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY="DEADBEEF"
 ENV NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY="$NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY"
 
+# Telemetry credentials (optional, baked into image at build time)
+ARG NEXT_PRIVATE_TELEMETRY_KEY=""
+ENV NEXT_PRIVATE_TELEMETRY_KEY="$NEXT_PRIVATE_TELEMETRY_KEY"
+
+ARG NEXT_PRIVATE_TELEMETRY_HOST=""
+ENV NEXT_PRIVATE_TELEMETRY_HOST="$NEXT_PRIVATE_TELEMETRY_HOST"
+
 
 # Uncomment and use build args to enable remote caching
 # ARG TURBO_TEAM
@@ -80,6 +88,13 @@ RUN turbo run build --filter=@documenso/remix...
 FROM node:22-bookworm-slim AS runner
 
 USER root
+
+# Telemetry credentials (baked into image at build time, can be disabled at runtime)
+ARG NEXT_PRIVATE_TELEMETRY_KEY=""
+ENV NEXT_PRIVATE_TELEMETRY_KEY="$NEXT_PRIVATE_TELEMETRY_KEY"
+
+ARG NEXT_PRIVATE_TELEMETRY_HOST=""
+ENV NEXT_PRIVATE_TELEMETRY_HOST="$NEXT_PRIVATE_TELEMETRY_HOST"
 
 # System libs & fonts for headless Chromium
 RUN apt-get update && apt-get install -y --no-install-recommends \

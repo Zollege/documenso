@@ -1,5 +1,6 @@
 declare namespace NodeJS {
   export interface ProcessEnv {
+    PORT?: string;
     NEXT_PUBLIC_WEBAPP_URL?: string;
 
     NEXT_PRIVATE_GOOGLE_CLIENT_ID?: string;
@@ -70,6 +71,8 @@ declare namespace NodeJS {
     NEXT_PRIVATE_BROWSERLESS_URL?: string;
 
     NEXT_PRIVATE_JOBS_PROVIDER?: 'inngest' | 'local';
+
+    NEXT_PUBLIC_USE_INTERNAL_URL_BROWSERLESS?: string;
 
     /**
      * Inngest environment variables
