@@ -63,6 +63,13 @@ msgstr "(나)"
 msgid "{0, plural, one {(1 character over)} other {(# characters over)}}"
 msgstr "{0, plural, other {(#자 초과)}}"
 
+#. placeholder {0}: table.getFilteredRowModel().rows.length
+#. placeholder {1}: table.getFilteredSelectedRowModel().rows.length
+#. placeholder {2}: table.getFilteredSelectedRowModel().rows.length
+#: packages/ui/primitives/data-table-pagination.tsx
+msgid "{0, plural, one {{1} of # row selected.} other {{2} of # rows selected.}}"
+msgstr ""
+
 #. placeholder {0}: Math.abs(remaningLength)
 #: apps/remix/app/components/dialogs/public-profile-template-manage-dialog.tsx
 #: apps/remix/app/components/forms/public-profile-form.tsx
@@ -185,12 +192,6 @@ msgstr "{0}이(가) 귀하께 문서에 {recipientActionVerb}하도록 초대했
 #: apps/remix/app/components/general/envelope/envelope-upload-button.tsx
 msgid "{0} of {1} documents remaining this month."
 msgstr "이번 달 남은 문서 {1}개 중 {0}개."
-
-#. placeholder {0}: table.getFilteredSelectedRowModel().rows.length
-#. placeholder {1}: table.getFilteredRowModel().rows.length
-#: packages/ui/primitives/data-table-pagination.tsx
-msgid "{0} of {1} row(s) selected."
-msgstr "{1}개 행 중 {0}개 행이 선택되었습니다."
 
 #. placeholder {0}: user.name || user.email
 #. placeholder {1}: envelope.team.name
@@ -507,6 +508,10 @@ msgstr "<0>{teamName}</0> 팀에서 Documenso에서 사용할 팀용 이메일 �
 msgid "<0>Account management:</0> Modify your account settings, permissions, and preferences"
 msgstr "<0>계정 관리:</0> 계정 설정, 권한 및 기본 설정 변경"
 
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "<0>Admins only</0> - Only admins can access and view the document"
+msgstr ""
+
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "<0>Data access:</0> Access all data associated with your account"
 msgstr "<0>데이터 접근:</0> 귀하의 계정과 연결된 모든 데이터에 접근"
@@ -524,6 +529,10 @@ msgstr "<0>이메일</0> - 수신자는 이메일로 문서를 받아 서명, �
 msgid "<0>Events:</0> All"
 msgstr "<0>이벤트:</0> 전체"
 
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "<0>Everyone</0> - Everyone can access and view the document"
+msgstr ""
+
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "<0>Full account access:</0> View all your profile information, settings, and activity"
 msgstr "<0>전체 계정 접근:</0> 프로필 정보, 설정 및 활동 전체 보기"
@@ -531,6 +540,10 @@ msgstr "<0>전체 계정 접근:</0> 프로필 정보, 설정 및 활동 전체 
 #: packages/ui/components/recipient/recipient-action-auth-select.tsx
 msgid "<0>Inherit authentication method</0> - Use the global action signing authentication method configured in the \"General Settings\" step"
 msgstr "<0>인증 방식 상속</0> - \"일반 설정\" 단계에서 구성한 전역 액션 서명 인증 방식을 사용합니다."
+
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "<0>Managers and above</0> - Only managers and above can access and view the document"
+msgstr ""
 
 #: packages/ui/components/document/document-global-auth-action-select.tsx
 msgid "<0>No restrictions</0> - No authentication required"
@@ -940,11 +953,15 @@ msgid "Actions"
 msgstr "동작"
 
 #: apps/remix/app/components/tables/organisation-email-domains-table.tsx
-#: apps/remix/app/components/tables/user-billing-organisations-table.tsx
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.members.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/settings._index.tsx
 msgid "Active"
 msgstr "활성"
+
+#: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
+msgid "Active"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/settings+/security._index.tsx
 #: apps/remix/app/routes/_authenticated+/settings+/security.sessions.tsx
@@ -1923,6 +1940,7 @@ msgstr "브랜딩 환경설정"
 msgid "Branding preferences updated"
 msgstr "브랜딩 환경설정이 업데이트되었습니다"
 
+#: apps/remix/app/components/tables/document-logs-table.tsx
 #: apps/remix/app/components/tables/settings-security-activity-table.tsx
 msgid "Browser"
 msgstr "브라우저"
@@ -3557,6 +3575,9 @@ msgid "Document Viewed"
 msgstr "문서 열람 완료"
 
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-settings-dialog.tsx
+#: packages/ui/components/document/document-visibility-select.tsx
+#: packages/ui/primitives/document-flow/add-settings.tsx
+#: packages/ui/primitives/template-flow/add-template-settings.tsx
 msgid "Document visibility"
 msgstr "문서 공개 범위"
 
@@ -4507,10 +4528,15 @@ msgid "Forgot your password?"
 msgstr "비밀번호를 잊으셨나요?"
 
 #: apps/remix/app/components/dialogs/organisation-create-dialog.tsx
+msgctxt "Plan price"
+msgid "Free"
+msgstr ""
+
 #: apps/remix/app/components/tables/admin-organisations-table.tsx
 #: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Free"
-msgstr "무료"
+msgstr ""
 
 #: packages/lib/utils/fields.ts
 #: packages/ui/primitives/document-flow/types.ts
@@ -4800,6 +4826,8 @@ msgid "I'm sure! Delete it"
 msgstr "확실합니다! 삭제하세요"
 
 #: apps/remix/app/components/tables/admin-claims-table.tsx
+#: apps/remix/app/components/tables/admin-dashboard-users-table.tsx
+#: apps/remix/app/components/tables/admin-document-recipient-item-table.tsx
 msgid "ID"
 msgstr "ID"
 
@@ -4832,8 +4860,9 @@ msgid "Important: What This Means"
 msgstr "중요: 이것이 의미하는 것"
 
 #: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Inactive"
-msgstr "비활성"
+msgstr ""
 
 #: apps/remix/app/components/general/app-nav-mobile.tsx
 #: apps/remix/app/components/general/app-nav-mobile.tsx
@@ -4996,7 +5025,9 @@ msgstr "초대 일시"
 msgid "Invoice"
 msgstr "청구서"
 
+#: apps/remix/app/components/tables/document-logs-table.tsx
 #: apps/remix/app/components/tables/internal-audit-log-table.tsx
+#: apps/remix/app/components/tables/settings-security-activity-table.tsx
 #: apps/remix/app/routes/_authenticated+/settings+/security.sessions.tsx
 #: apps/remix/app/routes/_internal+/[__htmltopdf]+/certificate.tsx
 msgid "IP Address"
@@ -5105,6 +5136,7 @@ msgstr "마지막 수정"
 msgid "Last Retried"
 msgstr "마지막 재시도 시간"
 
+#: apps/remix/app/routes/_authenticated+/admin+/documents._index.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/documents.$id.logs.tsx
 msgid "Last updated"
 msgstr "마지막 업데이트"
@@ -5775,6 +5807,7 @@ msgstr "걱정하지 마세요. 이메일을 입력하시면 비밀번호를 재
 #: apps/remix/app/components/embed/authoring/configure-document-advanced-settings.tsx
 #: apps/remix/app/components/forms/editor/editor-field-number-form.tsx
 #: apps/remix/app/components/tables/admin-claims-table.tsx
+#: apps/remix/app/components/tables/admin-organisations-table.tsx
 #: packages/lib/constants/document.ts
 msgid "None"
 msgstr "없음"
@@ -6106,8 +6139,9 @@ msgid "Page {0} of {numPages}"
 msgstr "페이지 {0}/{numPages}"
 
 #: apps/remix/app/components/tables/admin-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Paid"
-msgstr "유료"
+msgstr ""
 
 #: apps/remix/app/components/forms/signin.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-auth-dialog.tsx
@@ -6187,8 +6221,9 @@ msgid "Password updated!"
 msgstr "비밀번호가 업데이트되었습니다!"
 
 #: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Past Due"
-msgstr "연체"
+msgstr ""
 
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
@@ -8751,6 +8786,10 @@ msgstr "찾고 있는 사용자는 삭제되었거나 이름이 변경되었거�
 msgid "The user's two factor authentication has been reset successfully."
 msgstr "사용자의 2단계 인증이 성공적으로 재설정되었습니다."
 
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "The visibility of the document to the recipient."
+msgstr ""
+
 #: apps/remix/app/components/dialogs/webhook-delete-dialog.tsx
 msgid "The webhook has been successfully deleted."
 msgstr "웹훅이 성공적으로 삭제되었습니다."
@@ -11204,4 +11243,3 @@ msgstr "인증 코드:"
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "your-domain.com another-domain.com"
 msgstr "your-domain.com another-domain.com"
-

@@ -63,6 +63,13 @@ msgstr "(Ty)"
 msgid "{0, plural, one {(1 character over)} other {(# characters over)}}"
 msgstr "{0, plural, one {Przekroczono 1 znak} few {Przekroczono # znaki} many {Przekroczono # znaków} other {Przekroczono # znaków}}"
 
+#. placeholder {0}: table.getFilteredRowModel().rows.length
+#. placeholder {1}: table.getFilteredSelectedRowModel().rows.length
+#. placeholder {2}: table.getFilteredSelectedRowModel().rows.length
+#: packages/ui/primitives/data-table-pagination.tsx
+msgid "{0, plural, one {{1} of # row selected.} other {{2} of # rows selected.}}"
+msgstr ""
+
 #. placeholder {0}: Math.abs(remaningLength)
 #: apps/remix/app/components/dialogs/public-profile-template-manage-dialog.tsx
 #: apps/remix/app/components/forms/public-profile-form.tsx
@@ -185,12 +192,6 @@ msgstr "Sprawdź i {recipientActionVerb} dokument utworzony przez zespół {0}"
 #: apps/remix/app/components/general/envelope/envelope-upload-button.tsx
 msgid "{0} of {1} documents remaining this month."
 msgstr "Pozostało {0} z {1} dokumentów w tym miesiącu."
-
-#. placeholder {0}: table.getFilteredSelectedRowModel().rows.length
-#. placeholder {1}: table.getFilteredRowModel().rows.length
-#: packages/ui/primitives/data-table-pagination.tsx
-msgid "{0} of {1} row(s) selected."
-msgstr "{0} z {1} wybranych wierszy."
 
 #. placeholder {0}: user.name || user.email
 #. placeholder {1}: envelope.team.name
@@ -507,6 +508,10 @@ msgstr "Zespół <0>{teamName}</0> poprosił o możliwość używania Twojego ad
 msgid "<0>Account management:</0> Modify your account settings, permissions, and preferences"
 msgstr "<0>Zarządzanie kontem:</0> Zmienianie ustawień konta i uprawnień"
 
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "<0>Admins only</0> - Only admins can access and view the document"
+msgstr ""
+
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "<0>Data access:</0> Access all data associated with your account"
 msgstr "<0>Dostęp do danych:</0> Uzyskiwanie dostępu do wszystkich danych powiązanych z kontem"
@@ -524,6 +529,10 @@ msgstr "<0>Adres e-mail</0> – Odbiorca otrzyma wiadomość z dokumentem do pod
 msgid "<0>Events:</0> All"
 msgstr "<0>Zdarzenia:</0> Wszystkie"
 
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "<0>Everyone</0> - Everyone can access and view the document"
+msgstr ""
+
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "<0>Full account access:</0> View all your profile information, settings, and activity"
 msgstr "<0>Pełny dostęp do konta:</0> Wyświetlanie informacji o profilu, ustawieniach i aktywności"
@@ -531,6 +540,10 @@ msgstr "<0>Pełny dostęp do konta:</0> Wyświetlanie informacji o profilu, usta
 #: packages/ui/components/recipient/recipient-action-auth-select.tsx
 msgid "<0>Inherit authentication method</0> - Use the global action signing authentication method configured in the \"General Settings\" step"
 msgstr "<0>Odziedzicz metodę uwierzytelniania</0> – Użyj metody uwierzytelniania skonfigurowanej w domyślnych ustawieniach"
+
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "<0>Managers and above</0> - Only managers and above can access and view the document"
+msgstr ""
 
 #: packages/ui/components/document/document-global-auth-action-select.tsx
 msgid "<0>No restrictions</0> - No authentication required"
@@ -940,11 +953,15 @@ msgid "Actions"
 msgstr "Akcje"
 
 #: apps/remix/app/components/tables/organisation-email-domains-table.tsx
-#: apps/remix/app/components/tables/user-billing-organisations-table.tsx
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.members.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/settings._index.tsx
 msgid "Active"
 msgstr "Aktywny"
+
+#: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
+msgid "Active"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/settings+/security._index.tsx
 #: apps/remix/app/routes/_authenticated+/settings+/security.sessions.tsx
@@ -1923,6 +1940,7 @@ msgstr "Ustawienia brandingu"
 msgid "Branding preferences updated"
 msgstr "Ustawienia brandingu zostały zaktualizowane"
 
+#: apps/remix/app/components/tables/document-logs-table.tsx
 #: apps/remix/app/components/tables/settings-security-activity-table.tsx
 msgid "Browser"
 msgstr "Przeglądarka"
@@ -3557,6 +3575,9 @@ msgid "Document Viewed"
 msgstr "Dokument został wyświetlony"
 
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-settings-dialog.tsx
+#: packages/ui/components/document/document-visibility-select.tsx
+#: packages/ui/primitives/document-flow/add-settings.tsx
+#: packages/ui/primitives/template-flow/add-template-settings.tsx
 msgid "Document visibility"
 msgstr "Widoczność dokumentu"
 
@@ -4507,10 +4528,15 @@ msgid "Forgot your password?"
 msgstr "Nie pamiętasz hasła?"
 
 #: apps/remix/app/components/dialogs/organisation-create-dialog.tsx
+msgctxt "Plan price"
+msgid "Free"
+msgstr ""
+
 #: apps/remix/app/components/tables/admin-organisations-table.tsx
 #: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Free"
-msgstr "Darmowy"
+msgstr ""
 
 #: packages/lib/utils/fields.ts
 #: packages/ui/primitives/document-flow/types.ts
@@ -4800,6 +4826,8 @@ msgid "I'm sure! Delete it"
 msgstr "Usuń trwale"
 
 #: apps/remix/app/components/tables/admin-claims-table.tsx
+#: apps/remix/app/components/tables/admin-dashboard-users-table.tsx
+#: apps/remix/app/components/tables/admin-document-recipient-item-table.tsx
 msgid "ID"
 msgstr "Identyfikator"
 
@@ -4832,8 +4860,9 @@ msgid "Important: What This Means"
 msgstr "Uwaga: Co to oznacza"
 
 #: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Inactive"
-msgstr "Nieaktywne"
+msgstr ""
 
 #: apps/remix/app/components/general/app-nav-mobile.tsx
 #: apps/remix/app/components/general/app-nav-mobile.tsx
@@ -4996,7 +5025,9 @@ msgstr "Data zaproszenia"
 msgid "Invoice"
 msgstr "Faktura"
 
+#: apps/remix/app/components/tables/document-logs-table.tsx
 #: apps/remix/app/components/tables/internal-audit-log-table.tsx
+#: apps/remix/app/components/tables/settings-security-activity-table.tsx
 #: apps/remix/app/routes/_authenticated+/settings+/security.sessions.tsx
 #: apps/remix/app/routes/_internal+/[__htmltopdf]+/certificate.tsx
 msgid "IP Address"
@@ -5105,6 +5136,7 @@ msgstr "Zmodyfikowano"
 msgid "Last Retried"
 msgstr "Ostatnie ponowienie"
 
+#: apps/remix/app/routes/_authenticated+/admin+/documents._index.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/documents.$id.logs.tsx
 msgid "Last updated"
 msgstr "Zaktualizowano"
@@ -5775,6 +5807,7 @@ msgstr "Nie martw się! Wpisz swój adres e-mail, a my wyślemy Ci specjalny lin
 #: apps/remix/app/components/embed/authoring/configure-document-advanced-settings.tsx
 #: apps/remix/app/components/forms/editor/editor-field-number-form.tsx
 #: apps/remix/app/components/tables/admin-claims-table.tsx
+#: apps/remix/app/components/tables/admin-organisations-table.tsx
 #: packages/lib/constants/document.ts
 msgid "None"
 msgstr "Brak"
@@ -6106,8 +6139,9 @@ msgid "Page {0} of {numPages}"
 msgstr "Strona {0} z {numPages}"
 
 #: apps/remix/app/components/tables/admin-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Paid"
-msgstr "Opłacona"
+msgstr ""
 
 #: apps/remix/app/components/forms/signin.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-auth-dialog.tsx
@@ -6187,8 +6221,9 @@ msgid "Password updated!"
 msgstr "Hasło zostało zaktualizowane!"
 
 #: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Past Due"
-msgstr "Po terminie"
+msgstr ""
 
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
@@ -8751,6 +8786,10 @@ msgstr "Użytkownik, którego szukasz, mógł zostać usunięty, zmieniony lub m
 msgid "The user's two factor authentication has been reset successfully."
 msgstr "Weryfikacja dwuetapowa została zresetowana."
 
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "The visibility of the document to the recipient."
+msgstr ""
+
 #: apps/remix/app/components/dialogs/webhook-delete-dialog.tsx
 msgid "The webhook has been successfully deleted."
 msgstr "Webhook został pomyślnie usunięty."
@@ -11204,4 +11243,3 @@ msgstr "Twój kod weryfikacyjny:"
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "your-domain.com another-domain.com"
 msgstr "your-domain.com another-domain.com"
-

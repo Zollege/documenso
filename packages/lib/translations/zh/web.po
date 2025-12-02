@@ -63,6 +63,13 @@ msgstr "（您）"
 msgid "{0, plural, one {(1 character over)} other {(# characters over)}}"
 msgstr "{0, plural, other {(# 个字符超出)}}"
 
+#. placeholder {0}: table.getFilteredRowModel().rows.length
+#. placeholder {1}: table.getFilteredSelectedRowModel().rows.length
+#. placeholder {2}: table.getFilteredSelectedRowModel().rows.length
+#: packages/ui/primitives/data-table-pagination.tsx
+msgid "{0, plural, one {{1} of # row selected.} other {{2} of # rows selected.}}"
+msgstr ""
+
 #. placeholder {0}: Math.abs(remaningLength)
 #: apps/remix/app/components/dialogs/public-profile-template-manage-dialog.tsx
 #: apps/remix/app/components/forms/public-profile-form.tsx
@@ -185,12 +192,6 @@ msgstr "{0} 邀请您 {recipientActionVerb} 一个文档"
 #: apps/remix/app/components/general/envelope/envelope-upload-button.tsx
 msgid "{0} of {1} documents remaining this month."
 msgstr "本月还剩 {0}/{1} 份文档可用。"
-
-#. placeholder {0}: table.getFilteredSelectedRowModel().rows.length
-#. placeholder {1}: table.getFilteredRowModel().rows.length
-#: packages/ui/primitives/data-table-pagination.tsx
-msgid "{0} of {1} row(s) selected."
-msgstr "已选择 {1} 行中的 {0} 行。"
 
 #. placeholder {0}: user.name || user.email
 #. placeholder {1}: envelope.team.name
@@ -507,6 +508,10 @@ msgstr "<0>{teamName}</0> 请求将您的邮箱地址用于其在 Documenso 上�
 msgid "<0>Account management:</0> Modify your account settings, permissions, and preferences"
 msgstr "<0>账户管理：</0> 修改您的账户设置、权限和偏好"
 
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "<0>Admins only</0> - Only admins can access and view the document"
+msgstr ""
+
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "<0>Data access:</0> Access all data associated with your account"
 msgstr "<0>数据访问：</0> 访问与您账户相关的所有数据"
@@ -524,6 +529,10 @@ msgstr "<0>电子邮件</0> - 收件人将通过电子邮件接收文档以进�
 msgid "<0>Events:</0> All"
 msgstr "<0>事件：</0>全部"
 
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "<0>Everyone</0> - Everyone can access and view the document"
+msgstr ""
+
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "<0>Full account access:</0> View all your profile information, settings, and activity"
 msgstr "<0>完整账户访问：</0> 查看您的所有个人资料信息、设置和活动"
@@ -531,6 +540,10 @@ msgstr "<0>完整账户访问：</0> 查看您的所有个人资料信息、设�
 #: packages/ui/components/recipient/recipient-action-auth-select.tsx
 msgid "<0>Inherit authentication method</0> - Use the global action signing authentication method configured in the \"General Settings\" step"
 msgstr "<0>继承认证方式</0> - 使用在“常规设置”步骤中配置的全局操作签署认证方式"
+
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "<0>Managers and above</0> - Only managers and above can access and view the document"
+msgstr ""
 
 #: packages/ui/components/document/document-global-auth-action-select.tsx
 msgid "<0>No restrictions</0> - No authentication required"
@@ -940,11 +953,15 @@ msgid "Actions"
 msgstr "操作"
 
 #: apps/remix/app/components/tables/organisation-email-domains-table.tsx
-#: apps/remix/app/components/tables/user-billing-organisations-table.tsx
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.members.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/settings._index.tsx
 msgid "Active"
 msgstr "启用"
+
+#: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
+msgid "Active"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/settings+/security._index.tsx
 #: apps/remix/app/routes/_authenticated+/settings+/security.sessions.tsx
@@ -1923,6 +1940,7 @@ msgstr "品牌偏好设置"
 msgid "Branding preferences updated"
 msgstr "品牌偏好设置已更新"
 
+#: apps/remix/app/components/tables/document-logs-table.tsx
 #: apps/remix/app/components/tables/settings-security-activity-table.tsx
 msgid "Browser"
 msgstr "浏览器"
@@ -3557,6 +3575,9 @@ msgid "Document Viewed"
 msgstr "文档已查看"
 
 #: apps/remix/app/components/general/envelope-editor/envelope-editor-settings-dialog.tsx
+#: packages/ui/components/document/document-visibility-select.tsx
+#: packages/ui/primitives/document-flow/add-settings.tsx
+#: packages/ui/primitives/template-flow/add-template-settings.tsx
 msgid "Document visibility"
 msgstr "文档可见性"
 
@@ -4507,10 +4528,15 @@ msgid "Forgot your password?"
 msgstr "忘记密码？"
 
 #: apps/remix/app/components/dialogs/organisation-create-dialog.tsx
+msgctxt "Plan price"
+msgid "Free"
+msgstr ""
+
 #: apps/remix/app/components/tables/admin-organisations-table.tsx
 #: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Free"
-msgstr "免费"
+msgstr ""
 
 #: packages/lib/utils/fields.ts
 #: packages/ui/primitives/document-flow/types.ts
@@ -4800,6 +4826,8 @@ msgid "I'm sure! Delete it"
 msgstr "我确定！删除"
 
 #: apps/remix/app/components/tables/admin-claims-table.tsx
+#: apps/remix/app/components/tables/admin-dashboard-users-table.tsx
+#: apps/remix/app/components/tables/admin-document-recipient-item-table.tsx
 msgid "ID"
 msgstr "ID"
 
@@ -4832,8 +4860,9 @@ msgid "Important: What This Means"
 msgstr "重要：这意味着什么"
 
 #: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Inactive"
-msgstr "未激活"
+msgstr ""
 
 #: apps/remix/app/components/general/app-nav-mobile.tsx
 #: apps/remix/app/components/general/app-nav-mobile.tsx
@@ -4996,7 +5025,9 @@ msgstr "邀请时间"
 msgid "Invoice"
 msgstr "发票"
 
+#: apps/remix/app/components/tables/document-logs-table.tsx
 #: apps/remix/app/components/tables/internal-audit-log-table.tsx
+#: apps/remix/app/components/tables/settings-security-activity-table.tsx
 #: apps/remix/app/routes/_authenticated+/settings+/security.sessions.tsx
 #: apps/remix/app/routes/_internal+/[__htmltopdf]+/certificate.tsx
 msgid "IP Address"
@@ -5105,6 +5136,7 @@ msgstr "上次修改时间"
 msgid "Last Retried"
 msgstr "上次重试时间"
 
+#: apps/remix/app/routes/_authenticated+/admin+/documents._index.tsx
 #: apps/remix/app/routes/_authenticated+/t.$teamUrl+/documents.$id.logs.tsx
 msgid "Last updated"
 msgstr "最后更新"
@@ -5775,6 +5807,7 @@ msgstr "别担心，这很常见！输入你的邮箱，我们会给你发送一
 #: apps/remix/app/components/embed/authoring/configure-document-advanced-settings.tsx
 #: apps/remix/app/components/forms/editor/editor-field-number-form.tsx
 #: apps/remix/app/components/tables/admin-claims-table.tsx
+#: apps/remix/app/components/tables/admin-organisations-table.tsx
 #: packages/lib/constants/document.ts
 msgid "None"
 msgstr "无"
@@ -6106,8 +6139,9 @@ msgid "Page {0} of {numPages}"
 msgstr "第 {0} 页，共 {numPages} 页"
 
 #: apps/remix/app/components/tables/admin-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Paid"
-msgstr "付费"
+msgstr ""
 
 #: apps/remix/app/components/forms/signin.tsx
 #: apps/remix/app/components/general/document-signing/document-signing-auth-dialog.tsx
@@ -6187,8 +6221,9 @@ msgid "Password updated!"
 msgstr "密码已更新！"
 
 #: apps/remix/app/components/tables/user-billing-organisations-table.tsx
+msgctxt "Subscription status"
 msgid "Past Due"
-msgstr "逾期"
+msgstr ""
 
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
 #: apps/remix/app/components/general/organisations/organisation-billing-banner.tsx
@@ -8751,6 +8786,10 @@ msgstr "您要查找的用户可能已被删除、重命名，或从未存在。
 msgid "The user's two factor authentication has been reset successfully."
 msgstr "该用户的双重身份验证已成功重置。"
 
+#: packages/ui/components/document/document-visibility-select.tsx
+msgid "The visibility of the document to the recipient."
+msgstr ""
+
 #: apps/remix/app/components/dialogs/webhook-delete-dialog.tsx
 msgid "The webhook has been successfully deleted."
 msgstr "Webhook 已成功删除。"
@@ -11204,4 +11243,3 @@ msgstr "您的验证码："
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "your-domain.com another-domain.com"
 msgstr "your-domain.com another-domain.com"
-
