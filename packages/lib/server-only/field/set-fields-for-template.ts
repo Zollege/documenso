@@ -37,6 +37,7 @@ export type SetFieldsForTemplateOptions = {
     pageWidth: number;
     pageHeight: number;
     fieldMeta?: FieldMeta;
+    autosign?: boolean;
   }[];
 };
 
@@ -189,6 +190,7 @@ export const setFieldsForTemplate = async ({
           positionY: field.pageY,
           width: field.pageWidth,
           height: field.pageHeight,
+          autosign: field.autosign ?? false,
           fieldMeta: parsedFieldMeta,
         },
         create: {
@@ -200,6 +202,7 @@ export const setFieldsForTemplate = async ({
           height: field.pageHeight,
           customText: '',
           inserted: false,
+          autosign: field.autosign ?? false,
           fieldMeta: parsedFieldMeta,
           envelope: {
             connect: {

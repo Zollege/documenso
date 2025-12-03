@@ -582,6 +582,7 @@ export const fieldRouter = router({
           pageWidth: field.pageWidth,
           pageHeight: field.pageHeight,
           fieldMeta: field.fieldMeta,
+          autosign: field.autosign,
         })),
       });
     }),

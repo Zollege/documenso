@@ -74,6 +74,7 @@ import { Textarea } from '../textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip';
 import type { TAddTemplateSettingsFormSchema } from './add-template-settings.types';
 import { ZAddTemplateSettingsFormSchema } from './add-template-settings.types';
+import { ReplaceTemplatePdf } from './replace-template-pdf';
 
 export type AddTemplateSettingsFormProps = {
   documentFlow: DocumentFlowStep;
@@ -199,6 +200,14 @@ export const AddTemplateSettingsFormPartial = ({
             fields={mapFieldsWithRecipients(fields, recipients)}
           />
         )}
+
+        <ReplaceTemplatePdf
+          templateId={template.id}
+          onSuccess={async () => {
+            // Reload the page to show the updated PDF
+            window.location.reload();
+          }}
+        />
 
         <Form {...form}>
           <fieldset

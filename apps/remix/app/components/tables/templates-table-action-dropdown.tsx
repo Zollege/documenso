@@ -2,7 +2,17 @@ import { useState } from 'react';
 
 import { Trans } from '@lingui/react/macro';
 import type { Recipient, TemplateDirectLink } from '@prisma/client';
-import { Copy, Edit, FolderIcon, MoreHorizontal, Share2Icon, Trash2, Upload } from 'lucide-react';
+import { DocumentStatus } from '@prisma/client';
+import {
+  Copy,
+  Download,
+  Edit,
+  FolderIcon,
+  MoreHorizontal,
+  Share2Icon,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import { Link } from 'react-router';
 
 import { useSession } from '@documenso/lib/client-only/providers/session';
@@ -14,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from '@documenso/ui/primitives/dropdown-menu';
 
+import { EnvelopeDownloadDialog } from '../dialogs/envelope-download-dialog';
 import { TemplateBulkSendDialog } from '../dialogs/template-bulk-send-dialog';
 import { TemplateDeleteDialog } from '../dialogs/template-delete-dialog';
 import { TemplateDirectLinkDialog } from '../dialogs/template-direct-link-dialog';
@@ -76,6 +87,17 @@ export const TemplatesTableActionDropdown = ({
           <Copy className="mr-2 h-4 w-4" />
           <Trans>Duplicate</Trans>
         </DropdownMenuItem>
+
+        <EnvelopeDownloadDialog
+          envelopeId={row.envelopeId}
+          envelopeStatus={DocumentStatus.DRAFT}
+          trigger={
+            <div className="hover:bg-accent hover:text-accent-foreground relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors">
+              <Download className="mr-2 h-4 w-4" />
+              <Trans>Download</Trans>
+            </div>
+          }
+        />
 
         <TemplateDirectLinkDialog
           templateId={row.id}

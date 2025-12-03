@@ -33,6 +33,7 @@ export const ZSetEnvelopeFieldsRequestSchema = z.object({
       width: ZClampedFieldWidthSchema,
       height: ZClampedFieldHeightSchema,
       fieldMeta: ZFieldMetaSchema,
+      autosign: z.boolean().optional(),
     }),
   ),
 });

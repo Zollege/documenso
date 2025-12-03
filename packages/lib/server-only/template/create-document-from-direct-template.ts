@@ -444,6 +444,7 @@ export const createDocumentFromDirectTemplate = async ({
           height: field.height,
           customText: '',
           inserted: false,
+          autosign: field.autosign ?? false,
           fieldMeta: field.fieldMeta,
         })),
       );
