@@ -77,6 +77,7 @@ export type FieldFormType = {
   signerEmail: string;
   recipientId: number;
   fieldMeta?: FieldMeta;
+  autosign?: boolean;
 };
 
 export type AddFieldsFormProps = {
@@ -457,8 +458,8 @@ export const AddFieldsFormPartial = ({
         setFieldClipboard(lastActiveField);
 
         toast({
-          title: 'Copied field',
-          description: 'Copied field to clipboard',
+          title: _(msg`Copied field`),
+          description: _(msg`Copied field to clipboard`),
         });
       }
     },

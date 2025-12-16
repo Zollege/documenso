@@ -158,6 +158,7 @@ export const duplicateEnvelope = async ({ id, userId, teamId }: DuplicateEnvelop
               height: field.height,
               customText: '',
               inserted: false,
+              autosign: field.autosign ?? false,
               fieldMeta: field.fieldMeta as PrismaJson.FieldMeta,
             })),
           },

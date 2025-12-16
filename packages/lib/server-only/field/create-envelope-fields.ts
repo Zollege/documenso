@@ -26,11 +26,12 @@ export interface CreateEnvelopeFieldsOptions {
     envelopeItemId?: string;
 
     recipientId: number;
-    pageNumber: number;
-    pageX: number;
-    pageY: number;
+    page: number;
+    positionX: number;
+    positionY: number;
     width: number;
     height: number;
+    autosign?: boolean;
   })[];
   requestMetadata: ApiRequestMetadata;
 }
@@ -122,13 +123,14 @@ export const createEnvelopeFields = async ({
     const newlyCreatedFields = await tx.field.createManyAndReturn({
       data: validatedFields.map((field) => ({
         type: field.type,
-        page: field.pageNumber,
-        positionX: field.pageX,
-        positionY: field.pageY,
+        page: field.page,
+        positionX: field.positionX,
+        positionY: field.positionY,
         width: field.width,
         height: field.height,
         customText: '',
         inserted: false,
+        autosign: field.autosign ?? false,
         fieldMeta: field.fieldMeta,
         envelopeId: envelope.id,
         envelopeItemId: field.envelopeItemId,

@@ -39,6 +39,7 @@ import { InitialsFieldAdvancedSettings } from './field-items-advanced-settings/i
 import { NameFieldAdvancedSettings } from './field-items-advanced-settings/name-field';
 import { NumberFieldAdvancedSettings } from './field-items-advanced-settings/number-field';
 import { RadioFieldAdvancedSettings } from './field-items-advanced-settings/radio-field';
+import { SignatureFieldAdvancedSettings } from './field-items-advanced-settings/signature-field';
 import { TextFieldAdvancedSettings } from './field-items-advanced-settings/text-field';
 
 export type FieldAdvancedSettingsProps = {
@@ -50,6 +51,7 @@ export type FieldAdvancedSettingsProps = {
   isDocumentPdfLoaded?: boolean;
   onSave?: (fieldState: FieldMeta) => void;
   onAutoSave?: (fieldState: FieldMeta) => Promise<void>;
+  onAutosignSave?: (autosign: boolean) => void;
 };
 
 export type FieldMetaKeys =
@@ -64,8 +66,11 @@ export type FieldMetaKeys =
   | keyof EmailFieldMeta
   | keyof DateFieldMeta;
 
-const getDefaultState = (fieldType: FieldType): FieldMeta => {
+const getDefaultState = (fieldType: FieldType): FieldMeta | null => {
   switch (fieldType) {
+    case FieldType.SIGNATURE:
+    case FieldType.FREE_SIGNATURE:
+      return null;
     case FieldType.INITIALS:
       return {
         type: 'initials',
@@ -122,6 +127,7 @@ const getDefaultState = (fieldType: FieldType): FieldMeta => {
         values: [],
         required: false,
         readOnly: false,
+        direction: 'vertical',
       };
     case FieldType.CHECKBOX:
       return {
@@ -157,6 +163,7 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
       isDocumentPdfLoaded = true,
       onSave,
       onAutoSave,
+      onAutosignSave,
     },
     ref,
   ) => {
@@ -164,26 +171,34 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
     const { toast } = useToast();
 
     const [errors, setErrors] = useState<string[]>([]);
+    const [autosign, setAutosign] = useState(field.autosign ?? false);
 
     const fieldMeta = field?.fieldMeta;
 
     const localStorageKey = `field_${field.formId}_${field.type}`;
 
-    const defaultState: FieldMeta = getDefaultState(field.type);
+    const defaultState: FieldMeta | null = getDefaultState(field.type);
 
-    const [fieldState, setFieldState] = useState(() => {
+    const [fieldState, setFieldState] = useState<FieldMeta | null>(() => {
       const savedState = localStorage.getItem(localStorageKey);
-      return savedState ? { ...defaultState, ...JSON.parse(savedState) } : defaultState;
+      if (savedState) {
+        return defaultState ? { ...defaultState, ...JSON.parse(savedState) } : JSON.parse(savedState);
+      }
+      return defaultState;
     });
+
+    // Update autosign state when field changes
+    useEffect(() => {
+      setAutosign(field.autosign ?? false);
+    }, [field.autosign]);
 
     useEffect(() => {
       if (fieldMeta && typeof fieldMeta === 'object') {
         const parsedFieldMeta = ZFieldMetaSchema.parse(fieldMeta);
 
-        setFieldState({
-          ...defaultState,
-          ...parsedFieldMeta,
-        });
+        setFieldState(
+          (defaultState ? { ...defaultState, ...parsedFieldMeta } : parsedFieldMeta) as FieldMeta,
+        );
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fieldMeta]);
@@ -191,7 +206,7 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
     const { scheduleSave } = useAutoSave(onAutoSave || (async () => {}));
 
     const handleAutoSave = () => {
-      if (errors.length === 0) {
+      if (errors.length === 0 && fieldState) {
         scheduleSave(fieldState);
       }
     };
@@ -215,7 +230,11 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
         | boolean
         | number,
     ) => {
-      setFieldState((prevState: FieldMeta) => {
+      setFieldState((prevState: FieldMeta | null) => {
+        if (!prevState) {
+          return prevState;
+        }
+
         if (
           ['characterLimit', 'minValue', 'maxValue', 'validationLength', 'fontSize'].includes(key)
         ) {
@@ -241,7 +260,13 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
         } else {
           localStorage.setItem(localStorageKey, JSON.stringify(fieldState));
 
-          onSave?.(fieldState);
+          // For signature fields, save autosign setting
+          if (field.type === FieldType.SIGNATURE || field.type === FieldType.FREE_SIGNATURE) {
+            onAutosignSave?.(autosign);
+          } else if (fieldState) {
+            onSave?.(fieldState);
+          }
+
           onAdvancedSettings?.();
         }
       } catch (error) {
@@ -277,28 +302,28 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
           {match(field.type)
             .with(FieldType.INITIALS, () => (
               <InitialsFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.NAME, () => (
               <NameFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.EMAIL, () => (
               <EmailFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.DATE, () => (
               <DateFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
@@ -306,37 +331,49 @@ export const FieldAdvancedSettings = forwardRef<HTMLDivElement, FieldAdvancedSet
 
             .with(FieldType.TEXT, () => (
               <TextFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.NUMBER, () => (
               <NumberFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.RADIO, () => (
               <RadioFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.CHECKBOX, () => (
               <CheckboxFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
               />
             ))
             .with(FieldType.DROPDOWN, () => (
               <DropdownFieldAdvancedSettings
-                fieldState={fieldState}
+                fieldState={fieldState as any}
                 handleFieldChange={handleFieldChange}
                 handleErrors={setErrors}
+              />
+            ))
+            .with(FieldType.SIGNATURE, () => (
+              <SignatureFieldAdvancedSettings
+                autosign={autosign}
+                onAutosignChange={setAutosign}
+              />
+            ))
+            .with(FieldType.FREE_SIGNATURE, () => (
+              <SignatureFieldAdvancedSettings
+                autosign={autosign}
+                onAutosignChange={setAutosign}
               />
             ))
             .otherwise(() => null)}

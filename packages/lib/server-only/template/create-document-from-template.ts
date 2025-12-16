@@ -43,6 +43,7 @@ import {
 import type { ApiRequestMetadata } from '../../universal/extract-request-metadata';
 import { getFileServerSide } from '../../universal/upload/get-file.server';
 import { putPdfFileServerSide } from '../../universal/upload/put-file.server';
+import { fieldsContainUnsignedRequiredField } from '../../utils/advanced-fields-helpers';
 import { extractDerivedDocumentMeta } from '../../utils/document';
 import { createDocumentAuditLogData } from '../../utils/document-audit-logs';
 import {
@@ -90,6 +91,12 @@ export type CreateDocumentFromTemplateOptions = {
      */
     envelopeItemId?: string;
   }[];
+
+  attachments?: Array<{
+    label: string;
+    data: string;
+    type?: 'link';
+  }>;
 
   /**
    * Values that will override the predefined values in the template.
@@ -203,6 +210,7 @@ const getUpdatedFieldMeta = (field: Field, prefillField?: TFieldMetaPrefillField
         type: 'radio',
         label: field.label,
         values: newValues,
+        direction: radioMeta.direction ?? 'vertical',
       };
 
       return meta;
@@ -295,6 +303,7 @@ export const createDocumentFromTemplate = async ({
   requestMetadata,
   folderId,
   prefillFields,
+  attachments,
 }: CreateDocumentFromTemplateOptions) => {
   const { envelopeWhereInput } = await getEnvelopeWhereInput({
     id,
@@ -308,7 +317,25 @@ export const createDocumentFromTemplate = async ({
     include: {
       recipients: {
         include: {
-          fields: true,
+          fields: {
+            select: {
+              id: true,
+              envelopeId: true,
+              envelopeItemId: true,
+              recipientId: true,
+              type: true,
+              page: true,
+              positionX: true,
+              positionY: true,
+              width: true,
+              height: true,
+              customText: true,
+              inserted: true,
+              autosign: true,
+              fieldMeta: true,
+              secondaryId: true,
+            },
+          },
         },
       },
       envelopeItems: {
@@ -388,8 +415,6 @@ export const createDocumentFromTemplate = async ({
     };
   });
 
-  const firstEnvelopeItemId = template.envelopeItems[0].id;
-
   // Key = original envelope item ID
   // Value = duplicated envelope item ID.
   const oldEnvelopeItemToNewEnvelopeItemIdMap: Record<string, string> = {};
@@ -400,10 +425,14 @@ export const createDocumentFromTemplate = async ({
     template.envelopeItems.map(async (item, i) => {
       let documentDataIdToDuplicate = item.documentDataId;
 
-      const foundCustomDocumentData = customDocumentData.find(
-        (customDocumentDataItem) =>
-          customDocumentDataItem.envelopeItemId || firstEnvelopeItemId === item.id,
-      );
+      const foundCustomDocumentData = customDocumentData.find((customDocumentDataItem) => {
+        // Handle empty envelopeItemId for backwards compatibility reasons.
+        if (customDocumentDataItem.documentDataId && !customDocumentDataItem.envelopeItemId) {
+          return true;
+        }
+
+        return customDocumentDataItem.envelopeItemId === item.id;
+      });
 
       if (foundCustomDocumentData) {
         documentDataIdToDuplicate = foundCustomDocumentData.documentDataId;
@@ -597,6 +626,12 @@ export const createDocumentFromTemplate = async ({
         fields.map((field) => {
           const prefillField = prefillFields?.find((value) => value.id === field.id);
 
+          console.log('[DEBUG] Template field autosign value:', {
+            fieldId: field.id,
+            fieldType: field.type,
+            autosign: field.autosign,
+          });
+
           const payload = {
             envelopeItemId: oldEnvelopeItemToNewEnvelopeItemIdMap[field.envelopeItemId],
             envelopeId: envelope.id,
@@ -609,6 +644,7 @@ export const createDocumentFromTemplate = async ({
             height: field.height,
             customText: '',
             inserted: false,
+            autosign: field.autosign ?? false,
             fieldMeta: field.fieldMeta,
           };
 
@@ -652,6 +688,174 @@ export const createDocumentFromTemplate = async ({
       })),
     });
 
+    // Handle auto-signing for fields marked with autosign=true
+    const autoSignFields = fieldsToCreate.filter((field) => field.autosign);
+
+    console.log('[DEBUG] Auto-sign fields to process:', {
+      totalFields: fieldsToCreate.length,
+      autoSignFieldsCount: autoSignFields.length,
+      autoSignFields: autoSignFields.map((f) => ({
+        type: f.type,
+        autosign: f.autosign,
+      })),
+    });
+
+    if (autoSignFields.length > 0) {
+      // Get the created fields to get their IDs
+      const createdFields = await tx.field.findMany({
+        where: {
+          envelopeId: envelope.id,
+          autosign: true,
+        },
+        include: {
+          recipient: true,
+        },
+      });
+
+      console.log('[DEBUG] Created fields found in database:', {
+        count: createdFields.length,
+        fields: createdFields.map((f) => ({
+          id: f.id,
+          type: f.type,
+          autosign: f.autosign,
+          recipientId: f.recipientId,
+        })),
+      });
+
+      // Track recipients that have auto-signed fields
+      const recipientsWithAutoSignedFields = new Set<number>();
+
+      // Auto-sign each field
+      for (const field of createdFields) {
+        console.log('[DEBUG] Processing auto-sign for field:', {
+          id: field.id,
+          type: field.type,
+          recipientName: field.recipient.name,
+          recipientEmail: field.recipient.email,
+        });
+
+        recipientsWithAutoSignedFields.add(field.recipientId);
+
+        // For signature fields, create a signature entry
+        if (field.type === 'SIGNATURE' || field.type === 'FREE_SIGNATURE') {
+          const signature = await tx.signature.create({
+            data: {
+              fieldId: field.id,
+              recipientId: field.recipientId,
+              typedSignature: field.recipient.name || field.recipient.email,
+            },
+          });
+          console.log('[DEBUG] Created signature:', signature.id);
+        }
+
+        // Mark field as inserted
+        await tx.field.update({
+          where: { id: field.id },
+          data: { inserted: true },
+        });
+        console.log('[DEBUG] Marked field as inserted:', field.id);
+
+        // Create audit log for auto-signed field (without IP address)
+        await tx.documentAuditLog.create({
+          data: createDocumentAuditLogData({
+            type: DOCUMENT_AUDIT_LOG_TYPE.DOCUMENT_FIELD_INSERTED,
+            envelopeId: envelope.id,
+            metadata: {
+              ...requestMetadata,
+              requestMetadata: {
+                ...requestMetadata.requestMetadata,
+                ipAddress: undefined, // No IP for auto-signed fields
+              },
+            },
+            data: {
+              recipientEmail: field.recipient.email,
+              recipientId: field.recipientId,
+              recipientName: field.recipient.name || '',
+              recipientRole: field.recipient.role,
+              fieldId: field.secondaryId,
+              field: {
+                type: field.type,
+                data: field.recipient.name || field.recipient.email,
+              },
+            },
+          }),
+        });
+        console.log('[DEBUG] Created audit log for field:', field.id);
+      }
+
+      // Check if any recipients should now be marked as SIGNED
+      for (const recipientId of recipientsWithAutoSignedFields) {
+        const recipient = envelope.recipients.find((r) => r.id === recipientId);
+        if (!recipient) continue;
+
+        console.log('[DEBUG] Checking recipient completion:', {
+          recipientId,
+          recipientEmail: recipient.email,
+          currentStatus: recipient.signingStatus,
+        });
+
+        // Get all fields for this recipient to check if they're all filled
+        const recipientFields = await tx.field.findMany({
+          where: {
+            envelopeId: envelope.id,
+            recipientId: recipientId,
+          },
+        });
+
+        console.log('[DEBUG] Recipient fields:', {
+          recipientId,
+          totalFields: recipientFields.length,
+          insertedFields: recipientFields.filter((f) => f.inserted).length,
+        });
+
+        // Check if all required fields are now inserted
+        const hasUnsignedRequiredFields = fieldsContainUnsignedRequiredField(recipientFields);
+
+        console.log('[DEBUG] Has unsigned required fields:', hasUnsignedRequiredFields);
+
+        if (!hasUnsignedRequiredFields && recipient.signingStatus !== SigningStatus.SIGNED) {
+          // Mark recipient as signed
+          await tx.recipient.update({
+            where: { id: recipientId },
+            data: {
+              signingStatus: SigningStatus.SIGNED,
+              signedAt: new Date(),
+            },
+          });
+
+          console.log('[DEBUG] Marked recipient as SIGNED:', recipientId);
+
+          // Create audit log for recipient completion
+          await tx.documentAuditLog.create({
+            data: createDocumentAuditLogData({
+              type: DOCUMENT_AUDIT_LOG_TYPE.DOCUMENT_RECIPIENT_COMPLETED,
+              envelopeId: envelope.id,
+              user: {
+                name: recipient.name,
+                email: recipient.email,
+              },
+              metadata: {
+                ...requestMetadata,
+                requestMetadata: {
+                  ...requestMetadata.requestMetadata,
+                  ipAddress: undefined, // No IP for auto-signed recipients
+                },
+              },
+              data: {
+                recipientEmail: recipient.email,
+                recipientName: recipient.name,
+                recipientId: recipient.id,
+                recipientRole: recipient.role,
+                actionAuth: [], // Auto-signed, no action auth required
+              },
+            }),
+          });
+
+          console.log('[DEBUG] Created recipient completion audit log');
+        }
+      }
+    }
+
     await tx.documentAuditLog.create({
       data: createDocumentAuditLogData({
         type: DOCUMENT_AUDIT_LOG_TYPE.DOCUMENT_CREATED,
@@ -666,6 +870,33 @@ export const createDocumentFromTemplate = async ({
         },
       }),
     });
+
+    const templateAttachments = await tx.envelopeAttachment.findMany({
+      where: {
+        envelopeId: template.id,
+      },
+    });
+
+    const attachmentsToCreate = [
+      ...templateAttachments.map((attachment) => ({
+        envelopeId: envelope.id,
+        type: attachment.type,
+        label: attachment.label,
+        data: attachment.data,
+      })),
+      ...(attachments || []).map((attachment) => ({
+        envelopeId: envelope.id,
+        type: attachment.type || 'link',
+        label: attachment.label,
+        data: attachment.data,
+      })),
+    ];
+
+    if (attachmentsToCreate.length > 0) {
+      await tx.envelopeAttachment.createMany({
+        data: attachmentsToCreate,
+      });
+    }
 
     const createdEnvelope = await tx.envelope.findFirst({
       where: {
