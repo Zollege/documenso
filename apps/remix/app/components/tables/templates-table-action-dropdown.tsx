@@ -1,9 +1,8 @@
 import { useState } from 'react';
 
-import { msg } from '@lingui/core/macro';
-import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
 import type { Recipient, TemplateDirectLink } from '@prisma/client';
+import { DocumentStatus } from '@prisma/client';
 import {
   Copy,
   Download,
@@ -16,9 +15,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router';
 
-import { downloadPDF } from '@documenso/lib/client-only/download-pdf';
 import { useSession } from '@documenso/lib/client-only/providers/session';
-import { trpc } from '@documenso/trpc/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,8 +23,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@documenso/ui/primitives/dropdown-menu';
-import { useToast } from '@documenso/ui/primitives/use-toast';
 
+import { EnvelopeDownloadDialog } from '../dialogs/envelope-download-dialog';
 import { TemplateBulkSendDialog } from '../dialogs/template-bulk-send-dialog';
 import { TemplateDeleteDialog } from '../dialogs/template-delete-dialog';
 import { TemplateDirectLinkDialog } from '../dialogs/template-direct-link-dialog';
@@ -56,11 +53,7 @@ export const TemplatesTableActionDropdown = ({
   teamId,
   onDelete,
 }: TemplatesTableActionDropdownProps) => {
-  const { _ } = useLingui();
   const { user } = useSession();
-  const { toast } = useToast();
-
-  const utils = trpc.useUtils();
 
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDuplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
@@ -70,32 +63,6 @@ export const TemplatesTableActionDropdown = ({
   const isTeamTemplate = row.teamId === teamId;
 
   const formatPath = `${templateRootPath}/${row.envelopeId}/edit`;
-
-  const onDownloadClick = async () => {
-    try {
-      const template = await utils.template.getTemplateById.fetch({
-        templateId: row.id,
-      });
-
-      const documentData = template?.templateDocumentData;
-
-      if (!documentData) {
-        return;
-      }
-
-      await downloadPDF({
-        documentData,
-        fileName: row.title,
-        version: 'original',
-      });
-    } catch (err) {
-      toast({
-        title: _(msg`Something went wrong`),
-        description: _(msg`An error occurred while downloading your template.`),
-        variant: 'destructive',
-      });
-    }
-  };
 
   return (
     <DropdownMenu>
@@ -121,10 +88,16 @@ export const TemplatesTableActionDropdown = ({
           <Trans>Duplicate</Trans>
         </DropdownMenuItem>
 
-        <DropdownMenuItem onClick={onDownloadClick}>
-          <Download className="mr-2 h-4 w-4" />
-          <Trans>Download</Trans>
-        </DropdownMenuItem>
+        <EnvelopeDownloadDialog
+          envelopeId={row.envelopeId}
+          envelopeStatus={DocumentStatus.DRAFT}
+          trigger={
+            <div className="hover:bg-accent hover:text-accent-foreground relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors">
+              <Download className="mr-2 h-4 w-4" />
+              <Trans>Download</Trans>
+            </div>
+          }
+        />
 
         <TemplateDirectLinkDialog
           templateId={row.id}
