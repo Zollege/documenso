@@ -63,13 +63,6 @@ msgstr "{0, plural, one {(1 caractere excedido)} other {(# caracteres excedidos)
 #. placeholder {2}: table.getFilteredSelectedRowModel().rows.length
 #: packages/ui/primitives/data-table-pagination.tsx
 msgid "{0, plural, one {{1} of # row selected.} other {{2} of # rows selected.}}"
-msgstr "{0, plural, one {{1} de # linha selecionada.} other {{2} de # linhas selecionadas.}}"
-
-#. placeholder {0}: table.getFilteredRowModel().rows.length
-#. placeholder {1}: table.getFilteredSelectedRowModel().rows.length
-#. placeholder {2}: table.getFilteredSelectedRowModel().rows.length
-#: packages/ui/primitives/data-table-pagination.tsx
-msgid "{0, plural, one {{1} of # row selected.} other {{2} of # rows selected.}}"
 msgstr ""
 
 #. placeholder {0}: Math.abs(remaningLength)
@@ -593,10 +586,6 @@ msgstr "<0>Gerenciamento de conta:</0> Modifique as configurações, permissões
 
 #: packages/ui/components/document/document-visibility-select.tsx
 msgid "<0>Admins only</0> - Only admins can access and view the document"
-msgstr "<0>Apenas administradores</0> - Apenas administradores podem acessar e visualizar o documento"
-
-#: packages/ui/components/document/document-visibility-select.tsx
-msgid "<0>Admins only</0> - Only admins can access and view the document"
 msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
@@ -618,10 +607,6 @@ msgstr "<0>Eventos:</0> Todos"
 
 #: packages/ui/components/document/document-visibility-select.tsx
 msgid "<0>Everyone</0> - Everyone can access and view the document"
-msgstr "<0>Todos</0> - Todos podem acessar e visualizar o documento"
-
-#: packages/ui/components/document/document-visibility-select.tsx
-msgid "<0>Everyone</0> - Everyone can access and view the document"
 msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
@@ -631,10 +616,6 @@ msgstr "<0>Acesso total à conta:</0> Visualize todas as informações do seu pe
 #: packages/ui/components/recipient/recipient-action-auth-select.tsx
 msgid "<0>Inherit authentication method</0> - Use the global action signing authentication method configured in the \"General Settings\" step"
 msgstr "<0>Herdar método de autenticação</0> - Use o método de autenticação de assinatura de ação global configurado na etapa \"Configurações Gerais\""
-
-#: packages/ui/components/document/document-visibility-select.tsx
-msgid "<0>Managers and above</0> - Only managers and above can access and view the document"
-msgstr "<0>Gerentes e acima</0> - Apenas gerentes e superiores podem acessar e visualizar o documento"
 
 #: packages/ui/components/document/document-visibility-select.tsx
 msgid "<0>Managers and above</0> - Only managers and above can access and view the document"
