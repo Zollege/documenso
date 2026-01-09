@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@documenso/ui/primitives/av
 
 import { EnvelopeDropZoneWrapper } from '~/components/general/envelope/envelope-drop-zone-wrapper';
 import { FolderGrid } from '~/components/general/folder/folder-grid';
+import { TemplateSearch } from '~/components/general/template/template-search';
 import { TemplatesTable } from '~/components/tables/templates-table';
 import { useCurrentTeam } from '~/providers/team';
 import { appMetaTags } from '~/utils/meta';
@@ -27,6 +28,7 @@ export default function TemplatesPage() {
 
   const page = Number(searchParams.get('page')) || 1;
   const perPage = Number(searchParams.get('perPage')) || 10;
+  const query = searchParams.get('query') || '';
 
   const documentRootPath = formatDocumentsPath(team.url);
   const templateRootPath = formatTemplatesPath(team.url);
@@ -35,6 +37,7 @@ export default function TemplatesPage() {
     page: page,
     perPage: perPage,
     folderId,
+    query: query || undefined,
   });
 
   return (
@@ -43,17 +46,23 @@ export default function TemplatesPage() {
         <FolderGrid type={FolderType.TEMPLATE} parentId={folderId ?? null} />
 
         <div className="mt-8">
-          <div className="flex flex-row items-center">
-            <Avatar className="dark:border-border mr-3 h-12 w-12 border-2 border-solid border-white">
-              {team.avatarImageId && <AvatarImage src={formatAvatarUrl(team.avatarImageId)} />}
-              <AvatarFallback className="text-muted-foreground text-xs">
-                {team.name.slice(0, 1)}
-              </AvatarFallback>
-            </Avatar>
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-8">
+            <div className="flex flex-row items-center">
+              <Avatar className="dark:border-border mr-3 h-12 w-12 border-2 border-solid border-white">
+                {team.avatarImageId && <AvatarImage src={formatAvatarUrl(team.avatarImageId)} />}
+                <AvatarFallback className="text-muted-foreground text-xs">
+                  {team.name.slice(0, 1)}
+                </AvatarFallback>
+              </Avatar>
 
-            <h1 className="truncate text-2xl font-semibold md:text-3xl">
-              <Trans>Templates</Trans>
-            </h1>
+              <h1 className="truncate text-2xl font-semibold md:text-3xl">
+                <Trans>Templates</Trans>
+              </h1>
+            </div>
+
+            <div className="flex w-48 flex-wrap items-center justify-between gap-x-2 gap-y-4">
+              <TemplateSearch initialValue={query} />
+            </div>
           </div>
 
           <div className="mt-8">
