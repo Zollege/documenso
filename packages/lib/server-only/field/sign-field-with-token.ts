@@ -115,8 +115,14 @@ export const signFieldWithToken = async ({
     throw new Error(`Recipient ${recipient.id} has already signed`);
   }
 
-  if (field.inserted) {
+  // Allow autosign fields that have already been auto-signed to pass through
+  if (field.inserted && !field.autosign) {
     throw new Error(`Field ${fieldId} has already been inserted`);
+  }
+
+  // If field was already auto-signed, just return it
+  if (field.inserted && field.autosign) {
+    return field;
   }
 
   // Unreachable code based on the above query but we need to satisfy TypeScript
