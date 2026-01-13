@@ -15,7 +15,11 @@
     "prisma:migrate-deploy": "prisma migrate deploy",
     "prisma:migrate-reset": "prisma migrate reset",
     "prisma:seed": "prisma db seed",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "jobs:list": "tsx ./jobs-cli.ts list",
+    "jobs:retry": "tsx ./jobs-cli.ts retry",
+    "jobs:retry-all": "tsx ./jobs-cli.ts retry-all",
+    "jobs:help": "tsx ./jobs-cli.ts help"
   },
   "prisma": {
     "seed": "tsx ./seed-database.ts"
