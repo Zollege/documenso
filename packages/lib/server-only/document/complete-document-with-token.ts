@@ -281,6 +281,153 @@ export const completeDocumentWithToken = async ({
         },
       }),
     });
+
+    // Check if all non-autosign fields are now complete
+    const allFields = await tx.field.findMany({
+      where: {
+        envelopeId: envelope.id,
+      },
+    });
+
+    const nonAutoSignFields = allFields.filter((f) => !f.autosign);
+    const allNonAutoSignFieldsComplete = !fieldsContainUnsignedRequiredField(nonAutoSignFields);
+
+    console.log('[DEBUG] Auto-sign check:', {
+      totalFields: allFields.length,
+      nonAutoSignFields: nonAutoSignFields.length,
+      allNonAutoSignFieldsComplete,
+    });
+
+    // If all non-autosign fields are complete, auto-sign the remaining autosign fields
+    if (allNonAutoSignFieldsComplete) {
+      const autoSignFields = await tx.field.findMany({
+        where: {
+          envelopeId: envelope.id,
+          autosign: true,
+          inserted: false,
+        },
+        include: {
+          recipient: true,
+        },
+      });
+
+      console.log('[DEBUG] Auto-signing fields:', {
+        count: autoSignFields.length,
+        fields: autoSignFields.map((f) => ({
+          id: f.id,
+          type: f.type,
+          recipientEmail: f.recipient.email,
+        })),
+      });
+
+      // Track which recipients had fields auto-signed
+      const recipientsWithAutoSignedFields = new Set<number>();
+
+      for (const field of autoSignFields) {
+        recipientsWithAutoSignedFields.add(field.recipientId);
+
+        // For signature fields, create a signature entry
+        if (field.type === 'SIGNATURE' || field.type === 'FREE_SIGNATURE') {
+          await tx.signature.create({
+            data: {
+              fieldId: field.id,
+              recipientId: field.recipientId,
+              typedSignature: field.recipient.name || field.recipient.email,
+            },
+          });
+        }
+
+        // Mark field as inserted
+        await tx.field.update({
+          where: { id: field.id },
+          data: { inserted: true },
+        });
+
+        // Create audit log for auto-signed field (without IP address)
+        await tx.documentAuditLog.create({
+          data: createDocumentAuditLogData({
+            type: DOCUMENT_AUDIT_LOG_TYPE.DOCUMENT_FIELD_INSERTED,
+            envelopeId: envelope.id,
+            metadata: {
+              ...requestMetadata,
+              requestMetadata: {
+                ...requestMetadata?.requestMetadata,
+                ipAddress: undefined, // No IP for auto-signed fields
+              },
+            },
+            data: {
+              recipientEmail: field.recipient.email,
+              recipientId: field.recipientId,
+              recipientName: field.recipient.name || '',
+              recipientRole: field.recipient.role,
+              fieldId: field.secondaryId,
+              field: {
+                type: field.type,
+                data: field.recipient.name || field.recipient.email,
+              },
+            },
+          }),
+        });
+      }
+
+      // Mark recipients as SIGNED if all their fields are now complete
+      for (const recipientId of recipientsWithAutoSignedFields) {
+        const recipientToCheck = await tx.recipient.findUnique({
+          where: { id: recipientId },
+        });
+
+        if (!recipientToCheck || recipientToCheck.signingStatus === SigningStatus.SIGNED) {
+          continue;
+        }
+
+        const recipientFields = await tx.field.findMany({
+          where: {
+            envelopeId: envelope.id,
+            recipientId: recipientId,
+          },
+        });
+
+        const hasUnsignedRequiredFields = fieldsContainUnsignedRequiredField(recipientFields);
+
+        if (!hasUnsignedRequiredFields) {
+          await tx.recipient.update({
+            where: { id: recipientId },
+            data: {
+              signingStatus: SigningStatus.SIGNED,
+              signedAt: new Date(),
+            },
+          });
+
+          // Create audit log for recipient completion
+          await tx.documentAuditLog.create({
+            data: createDocumentAuditLogData({
+              type: DOCUMENT_AUDIT_LOG_TYPE.DOCUMENT_RECIPIENT_COMPLETED,
+              envelopeId: envelope.id,
+              user: {
+                name: recipientToCheck.name,
+                email: recipientToCheck.email,
+              },
+              metadata: {
+                ...requestMetadata,
+                requestMetadata: {
+                  ...requestMetadata?.requestMetadata,
+                  ipAddress: undefined, // No IP for auto-signed recipients
+                },
+              },
+              data: {
+                recipientEmail: recipientToCheck.email,
+                recipientName: recipientToCheck.name,
+                recipientId: recipientToCheck.id,
+                recipientRole: recipientToCheck.role,
+                actionAuth: [], // Auto-signed, no action auth required
+              },
+            }),
+          });
+
+          console.log('[DEBUG] Marked auto-signed recipient as SIGNED:', recipientId);
+        }
+      }
+    }
   });
 
   await jobs.triggerJob({
