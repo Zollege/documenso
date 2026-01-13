@@ -348,13 +348,12 @@ export const completeDocumentWithToken = async ({
           data: createDocumentAuditLogData({
             type: DOCUMENT_AUDIT_LOG_TYPE.DOCUMENT_FIELD_INSERTED,
             envelopeId: envelope.id,
-            metadata: {
-              ...requestMetadata,
-              requestMetadata: {
-                ...requestMetadata?.requestMetadata,
-                ipAddress: undefined, // No IP for auto-signed fields
-              },
-            },
+            requestMetadata: requestMetadata
+              ? {
+                  ...requestMetadata,
+                  ipAddress: undefined, // No IP for auto-signed fields
+                }
+              : undefined,
             data: {
               recipientEmail: field.recipient.email,
               recipientId: field.recipientId,
@@ -407,13 +406,12 @@ export const completeDocumentWithToken = async ({
                 name: recipientToCheck.name,
                 email: recipientToCheck.email,
               },
-              metadata: {
-                ...requestMetadata,
-                requestMetadata: {
-                  ...requestMetadata?.requestMetadata,
-                  ipAddress: undefined, // No IP for auto-signed recipients
-                },
-              },
+              requestMetadata: requestMetadata
+                ? {
+                    ...requestMetadata,
+                    ipAddress: undefined, // No IP for auto-signed recipients
+                  }
+                : undefined,
               data: {
                 recipientEmail: recipientToCheck.email,
                 recipientName: recipientToCheck.name,
