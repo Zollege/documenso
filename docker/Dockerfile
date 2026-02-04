@@ -97,7 +97,7 @@ ENV NEXT_PRIVATE_TELEMETRY_KEY="$NEXT_PRIVATE_TELEMETRY_KEY"
 ARG NEXT_PRIVATE_TELEMETRY_HOST=""
 ENV NEXT_PRIVATE_TELEMETRY_HOST="$NEXT_PRIVATE_TELEMETRY_HOST"
 
-# System libs & fonts for headless Chromium
+# System libs & fonts for headless Chromium, plus Ghostscript for PDF compression
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl git \
       libnss3 libnss3-tools libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 \
@@ -105,6 +105,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       libasound2 libx11-6 libxext6 libxshmfence1 libxrender1 \
       fonts-liberation fonts-noto fonts-noto-cjk fonts-noto-color-emoji \
       libpango-1.0-0 libcairo2 \
+      ghostscript \
   && rm -rf /var/lib/apt/lists/*
 
 # Where Playwright will put browsers (make it now and chown later)

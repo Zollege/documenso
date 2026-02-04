@@ -32,6 +32,7 @@ import { sendCompletedEmail } from '../../../server-only/document/send-completed
 import { getAuditLogsPdf } from '../../../server-only/htmltopdf/get-audit-logs-pdf';
 import { getCertificatePdf } from '../../../server-only/htmltopdf/get-certificate-pdf';
 import { addRejectionStampToPdf } from '../../../server-only/pdf/add-rejection-stamp-to-pdf';
+import { compressPdf } from '../../../server-only/pdf/compress-pdf';
 import { flattenAnnotations } from '../../../server-only/pdf/flatten-annotations';
 import { flattenForm } from '../../../server-only/pdf/flatten-form';
 import { getPageSize } from '../../../server-only/pdf/get-page-size';
@@ -490,7 +491,10 @@ const decorateAndSignPdf = async ({
 
   const pdfBytes = await pdfDoc.save();
 
-  const pdfBuffer = await signPdf({ pdf: Buffer.from(pdfBytes) });
+  const signedPdfBuffer = await signPdf({ pdf: Buffer.from(pdfBytes) });
+
+  // Compress the signed PDF to reduce file size for email attachments
+  const pdfBuffer = await compressPdf({ pdf: signedPdfBuffer });
 
   const { name } = path.parse(envelopeItem.title);
 
