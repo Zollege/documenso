@@ -9,6 +9,7 @@ import { prisma } from '@documenso/prisma';
 
 import { getI18nInstance } from '../../client-only/providers/i18n-server';
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../constants/app';
+import { compressPdf } from '../pdf/compress-pdf';
 import { DOCUMENT_AUDIT_LOG_TYPE } from '../../types/document-audit-logs';
 import { extractDerivedDocumentEmailSettings } from '../../types/document-email';
 import type { RequestMetadata } from '../../universal/extract-request-metadata';
@@ -85,13 +86,16 @@ export const sendCompletedEmail = async ({ id, requestMetadata }: SendDocumentOp
     envelope.envelopeItems.map(async (envelopeItem) => {
       const file = await getFileServerSide(envelopeItem.documentData);
 
+      // Compress the PDF for email to avoid SMTP size limits
+      const compressedFile = await compressPdf({ pdf: Buffer.from(file) });
+
       // Use the envelope title for version 1, and the envelope item title for version 2.
       const fileNameToUse =
         envelope.internalVersion === 1 ? envelope.title : envelopeItem.title + '.pdf';
 
       return {
         filename: fileNameToUse.endsWith('.pdf') ? fileNameToUse : fileNameToUse + '.pdf',
-        content: Buffer.from(file),
+        content: compressedFile,
         contentType: 'application/pdf',
       };
     }),
