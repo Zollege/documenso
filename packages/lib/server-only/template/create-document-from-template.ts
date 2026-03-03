@@ -17,12 +17,14 @@ import { nanoid, prefixedId } from '@documenso/lib/universal/id';
 import { prisma } from '@documenso/prisma';
 
 import { DEFAULT_DOCUMENT_DATE_FORMAT } from '../../constants/date-formats';
+import type { TEnvelopeExpirationPeriod } from '../../constants/envelope-expiration';
 import type { SupportedLanguageCodes } from '../../constants/i18n';
 import { AppError, AppErrorCode } from '../../errors/app-error';
 import { ZDefaultRecipientsSchema } from '../../types/default-recipients';
 import { DOCUMENT_AUDIT_LOG_TYPE } from '../../types/document-audit-logs';
 import { ZRecipientAuthOptionsSchema } from '../../types/document-auth';
 import type { TDocumentEmailSettings } from '../../types/document-email';
+import type { TDocumentFormValues } from '../../types/document-form-values';
 import type {
   TCheckboxFieldMeta,
   TDropdownFieldMeta,
@@ -43,8 +45,7 @@ import {
 } from '../../types/webhook-payload';
 import type { ApiRequestMetadata } from '../../universal/extract-request-metadata';
 import { getFileServerSide } from '../../universal/upload/get-file.server';
-import { putPdfFileServerSide } from '../../universal/upload/put-file.server';
-import { fieldsContainUnsignedRequiredField } from '../../utils/advanced-fields-helpers';
+import { putNormalizedPdfFileServerSide } from '../../universal/upload/put-file.server';
 import { extractDerivedDocumentMeta } from '../../utils/document';
 import { createDocumentAuditLogData } from '../../utils/document-audit-logs';
 import {
@@ -57,6 +58,7 @@ import { mapSecondaryIdToTemplateId } from '../../utils/envelope';
 import { buildTeamWhereQuery } from '../../utils/teams';
 import { getEnvelopeWhereInput } from '../envelope/get-envelope-by-id';
 import { incrementDocumentId } from '../envelope/increment-id';
+import { insertFormValuesInPdf } from '../pdf/insert-form-values-in-pdf';
 import { getTeamSettings } from '../team/get-team-settings';
 import { triggerWebhook } from '../webhooks/trigger/trigger-webhook';
 
@@ -118,7 +120,10 @@ export type CreateDocumentFromTemplateOptions = {
     typedSignatureEnabled?: boolean;
     uploadSignatureEnabled?: boolean;
     drawSignatureEnabled?: boolean;
+    envelopeExpirationPeriod?: TEnvelopeExpirationPeriod | null;
   };
+
+  formValues?: TDocumentFormValues;
   requestMetadata: ApiRequestMetadata;
 };
 
@@ -305,6 +310,7 @@ export const createDocumentFromTemplate = async ({
   folderId,
   prefillFields,
   attachments,
+  formValues,
 }: CreateDocumentFromTemplateOptions) => {
   const { envelopeWhereInput } = await getEnvelopeWhereInput({
     id,
@@ -475,11 +481,19 @@ export const createDocumentFromTemplate = async ({
         });
       }
 
-      const buffer = await getFileServerSide(documentDataToDuplicate);
+      let buffer = await getFileServerSide(documentDataToDuplicate);
 
       const titleToUse = item.title || finalEnvelopeTitle;
 
-      const duplicatedFile = await putPdfFileServerSide({
+      if (formValues) {
+        // eslint-disable-next-line require-atomic-updates
+        buffer = await insertFormValuesInPdf({
+          pdf: Buffer.from(buffer),
+          formValues,
+        });
+      }
+
+      const duplicatedFile = await putNormalizedPdfFileServerSide({
         name: titleToUse,
         type: 'application/pdf',
         arrayBuffer: async () => Promise.resolve(buffer),
@@ -489,7 +503,7 @@ export const createDocumentFromTemplate = async ({
         data: {
           type: duplicatedFile.type,
           data: duplicatedFile.data,
-          initialData: duplicatedFile.initialData,
+          initialData: documentDataToDuplicate.data,
         },
       });
 
@@ -527,6 +541,8 @@ export const createDocumentFromTemplate = async ({
         override?.drawSignatureEnabled ?? template.documentMeta?.drawSignatureEnabled,
       allowDictateNextSigner:
         override?.allowDictateNextSigner ?? template.documentMeta?.allowDictateNextSigner,
+      envelopeExpirationPeriod:
+        override?.envelopeExpirationPeriod ?? template.documentMeta?.envelopeExpirationPeriod,
     }),
   });
 
@@ -557,6 +573,7 @@ export const createDocumentFromTemplate = async ({
         visibility: template.visibility || settings.documentVisibility,
         useLegacyFieldInsertion: template.useLegacyFieldInsertion ?? false,
         documentMetaId: documentMeta.id,
+        formValues: formValues ?? undefined,
         recipients: {
           createMany: {
             data: allFinalRecipients.map((recipient) => {
