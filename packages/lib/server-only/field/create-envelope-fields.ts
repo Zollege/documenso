@@ -46,6 +46,8 @@ export type CreateEnvelopeFieldInput = TFieldAndMeta & {
   envelopeItemId?: string;
 
   recipientId: number;
+
+  autosign?: boolean;
 } & FieldPosition;
 
 export interface CreateEnvelopeFieldsOptions {
