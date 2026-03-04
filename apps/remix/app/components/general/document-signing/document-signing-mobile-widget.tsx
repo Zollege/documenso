@@ -94,7 +94,7 @@ export const DocumentSigningMobileWidget = () => {
             </div>
 
             <div>
-              <EnvelopeSignerCompleteDialog />
+              <EnvelopeSignerCompleteDialog onNextField={() => setIsExpanded(false)} />
             </div>
           </div>
 
