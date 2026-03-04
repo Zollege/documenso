@@ -18,7 +18,13 @@ import { useEmbedSigningContext } from '~/components/embed/embed-signing-context
 import { DocumentSigningCompleteDialog } from '../document-signing/document-signing-complete-dialog';
 import { useRequiredEnvelopeSigningContext } from '../document-signing/envelope-signing-provider';
 
-export const EnvelopeSignerCompleteDialog = () => {
+export type EnvelopeSignerCompleteDialogProps = {
+  onNextField?: () => void;
+};
+
+export const EnvelopeSignerCompleteDialog = ({
+  onNextField,
+}: EnvelopeSignerCompleteDialogProps) => {
   const navigate = useNavigate();
   const analytics = useAnalytics();
 
@@ -56,6 +62,8 @@ export const EnvelopeSignerCompleteDialog = () => {
       setShowPendingFieldTooltip(false);
       return;
     }
+
+    onNextField?.();
 
     const isEnvelopeItemSwitch = nextField.envelopeItemId !== currentEnvelopeItem?.id;
 
