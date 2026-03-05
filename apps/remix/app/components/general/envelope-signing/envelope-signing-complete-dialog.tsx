@@ -78,7 +78,7 @@ export const EnvelopeSignerCompleteDialog = ({
         const fieldTooltip = document.querySelector(`#field-tooltip`);
 
         if (fieldTooltip) {
-          fieldTooltip.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          fieldTooltip.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       },
       isEnvelopeItemSwitch ? 150 : 50,

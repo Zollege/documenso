@@ -37,7 +37,7 @@ export const validateFieldsInserted = (fields: Field[]): boolean => {
     firstUninsertedField && document.getElementById(`field-${firstUninsertedField.id}`);
 
   if (firstUninsertedFieldElement) {
-    firstUninsertedFieldElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    firstUninsertedFieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return false;
   }
 
@@ -61,7 +61,7 @@ export const validateFieldsUninserted = (): boolean => {
   });
 
   if (errorElements.length > 0) {
-    errorElements[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    errorElements[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
     return false;
   }
 
