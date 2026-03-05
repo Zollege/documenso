@@ -198,7 +198,24 @@ export const DocumentSigningCompleteDialog = ({
 
   return (
     <Dialog open={showDialog} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
+      {isComplete ? (
+        <DialogTrigger asChild>
+          <Button
+            className="w-full"
+            type="button"
+            size={buttonSize}
+            loading={isSubmitting}
+            disabled={disabled}
+          >
+            {match(recipient.role)
+              .with(RecipientRole.APPROVER, () => <Trans>Approve</Trans>)
+              .with(RecipientRole.VIEWER, () => <Trans>Mark as viewed</Trans>)
+              .otherwise(() => (
+                <Trans>Complete</Trans>
+              ))}
+          </Button>
+        </DialogTrigger>
+      ) : (
         <Button
           className="w-full"
           type="button"
@@ -207,16 +224,9 @@ export const DocumentSigningCompleteDialog = ({
           loading={isSubmitting}
           disabled={disabled}
         >
-          {match({ isComplete, role: recipient.role })
-            .with({ isComplete: false }, () => <Trans>Next Field</Trans>)
-            .with({ isComplete: true, role: RecipientRole.APPROVER }, () => <Trans>Approve</Trans>)
-            .with({ isComplete: true, role: RecipientRole.VIEWER }, () => (
-              <Trans>Mark as viewed</Trans>
-            ))
-            .with({ isComplete: true }, () => <Trans>Complete</Trans>)
-            .exhaustive()}
+          <Trans>Next Field</Trans>
         </Button>
-      </DialogTrigger>
+      )}
 
       <DialogContent position={position}>
         <DialogHeader>
