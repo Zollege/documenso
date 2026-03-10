@@ -4,10 +4,7 @@ import { Trans } from '@lingui/react/macro';
 import { Loader } from 'lucide-react';
 import { useRevalidator } from 'react-router';
 
-import {
-  DEFAULT_DOCUMENT_DATE_FORMAT,
-  convertToLocalSystemFormat,
-} from '@documenso/lib/constants/date-formats';
+import { DEFAULT_DOCUMENT_DATE_FORMAT } from '@documenso/lib/constants/date-formats';
 import { DEFAULT_DOCUMENT_TIME_ZONE } from '@documenso/lib/constants/time-zones';
 import { DO_NOT_INVALIDATE_QUERY_ON_MUTATION } from '@documenso/lib/constants/trpc';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
@@ -59,11 +56,7 @@ export const DocumentSigningDateField = ({
   const safeFieldMeta = ZDateFieldMeta.safeParse(field.fieldMeta);
   const parsedFieldMeta = safeFieldMeta.success ? safeFieldMeta.data : null;
 
-  const localDateString = convertToLocalSystemFormat(field.customText, dateFormat, timezone);
-  const isDifferentTime = field.inserted && localDateString !== field.customText;
-  const tooltipText = _(
-    msg`"${field.customText}" will appear on the document as it has a timezone of "${timezone || ''}".`,
-  );
+  const displayDateString = field.customText;
 
   const onSign = async (authOptions?: TRecipientActionAuth) => {
     try {
@@ -133,16 +126,16 @@ export const DocumentSigningDateField = ({
       onSign={onSign}
       onRemove={onRemove}
       type="Date"
-      tooltipText={isDifferentTime ? tooltipText : undefined}
+      tooltipText={undefined}
     >
       {isLoading && (
-        <div className="bg-background absolute inset-0 flex items-center justify-center rounded-md">
-          <Loader className="text-primary h-5 w-5 animate-spin md:h-8 md:w-8" />
+        <div className="absolute inset-0 flex items-center justify-center rounded-md bg-background">
+          <Loader className="h-5 w-5 animate-spin text-primary md:h-8 md:w-8" />
         </div>
       )}
 
       {!field.inserted && (
-        <p className="group-hover:text-primary text-foreground group-hover:text-recipient-green text-[clamp(0.425rem,25cqw,0.825rem)] duration-200">
+        <p className="text-[clamp(0.425rem,25cqw,0.825rem)] text-foreground duration-200 group-hover:text-primary group-hover:text-recipient-green">
           <Trans>Date</Trans>
         </p>
       )}
@@ -151,14 +144,14 @@ export const DocumentSigningDateField = ({
         <div className="flex h-full w-full items-center">
           <p
             className={cn(
-              'text-foreground w-full whitespace-nowrap text-left text-[clamp(0.425rem,25cqw,0.825rem)] duration-200',
+              'w-full whitespace-nowrap text-left text-[clamp(0.425rem,25cqw,0.825rem)] text-foreground duration-200',
               {
                 '!text-center': parsedFieldMeta?.textAlign === 'center',
                 '!text-right': parsedFieldMeta?.textAlign === 'right',
               },
             )}
           >
-            {localDateString}
+            {displayDateString}
           </p>
         </div>
       )}
