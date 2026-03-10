@@ -4,10 +4,6 @@ import type { DocumentMeta, Signature } from '@prisma/client';
 import { FieldType } from '@prisma/client';
 import { ChevronDown } from 'lucide-react';
 
-import {
-  DEFAULT_DOCUMENT_DATE_FORMAT,
-  convertToLocalSystemFormat,
-} from '@documenso/lib/constants/date-formats';
 import type { TFieldMetaSchema } from '@documenso/lib/types/field-meta';
 import { fromCheckboxValue } from '@documenso/lib/universal/field-checkbox';
 
@@ -179,10 +175,7 @@ export const FieldContent = ({ field, documentMeta }: FieldIconProps) => {
     }
 
     if (field.type === FieldType.DATE) {
-      textToDisplay = convertToLocalSystemFormat(
-        field.customText ?? '',
-        documentMeta?.dateFormat ?? DEFAULT_DOCUMENT_DATE_FORMAT,
-      );
+      textToDisplay = field.customText ?? '';
     }
 
     if (isSignatureField && field.signature?.typedSignature) {
