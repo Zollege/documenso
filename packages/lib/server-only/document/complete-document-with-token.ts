@@ -8,16 +8,20 @@ import {
   SigningStatus,
   WebhookTriggerEvents,
 } from '@prisma/client';
+import { DateTime } from 'luxon';
 
 import {
   DOCUMENT_AUDIT_LOG_TYPE,
   RECIPIENT_DIFF_TYPE,
 } from '@documenso/lib/types/document-audit-logs';
+import { ZTextFieldMeta } from '@documenso/lib/types/field-meta';
 import type { RequestMetadata } from '@documenso/lib/universal/extract-request-metadata';
 import { fieldsContainUnsignedRequiredField } from '@documenso/lib/utils/advanced-fields-helpers';
 import { createDocumentAuditLogData } from '@documenso/lib/utils/document-audit-logs';
 import { prisma } from '@documenso/prisma';
 
+import { DEFAULT_DOCUMENT_DATE_FORMAT } from '../../constants/date-formats';
+import { DEFAULT_DOCUMENT_TIME_ZONE } from '../../constants/time-zones';
 import { AppError, AppErrorCode } from '../../errors/app-error';
 import { jobs } from '../../jobs/client';
 import type { TRecipientAccessAuth } from '../../types/document-auth';
@@ -340,10 +344,27 @@ export const completeDocumentWithToken = async ({
           });
         }
 
+        // Determine customText for auto-signed fields
+        let customText: string | undefined;
+
+        if (field.type === FieldType.DATE) {
+          customText = DateTime.now()
+            .setZone(envelope.documentMeta?.timezone ?? DEFAULT_DOCUMENT_TIME_ZONE)
+            .toFormat(envelope.documentMeta?.dateFormat ?? DEFAULT_DOCUMENT_DATE_FORMAT);
+        } else if (field.type === FieldType.TEXT) {
+          const parsedMeta = ZTextFieldMeta.safeParse(field.fieldMeta);
+          if (parsedMeta.success && parsedMeta.data.printedName) {
+            customText = field.recipient.name || field.recipient.email;
+          }
+        }
+
         // Mark field as inserted
         await tx.field.update({
           where: { id: field.id },
-          data: { inserted: true },
+          data: {
+            inserted: true,
+            ...(customText !== undefined ? { customText } : {}),
+          },
         });
 
         // Create audit log for auto-signed field (without IP address)

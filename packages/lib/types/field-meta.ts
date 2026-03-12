@@ -94,6 +94,7 @@ export const ZTextFieldMeta = ZBaseFieldMeta.extend({
   lineHeight: ZFieldMetaLineHeight.nullish(),
   letterSpacing: ZFieldMetaLetterSpacing.nullish(),
   verticalAlign: ZFieldMetaVerticalAlign.nullish(),
+  printedName: z.boolean().optional(),
 });
 
 export type TTextFieldMeta = z.infer<typeof ZTextFieldMeta>;
