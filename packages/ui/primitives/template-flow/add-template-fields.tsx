@@ -30,6 +30,7 @@ import { isTemplateRecipientEmailPlaceholder } from '@documenso/lib/constants/te
 import {
   type TFieldMetaSchema as FieldMeta,
   ZFieldMetaSchema,
+  ZTextFieldMeta,
 } from '@documenso/lib/types/field-meta';
 import { nanoid } from '@documenso/lib/universal/id';
 import { ADVANCED_FIELD_TYPES_WITH_OPTIONAL_SETTING } from '@documenso/lib/utils/advanced-fields-helpers';
@@ -557,11 +558,20 @@ export const AddTemplateFieldsFormPartial = ({
     const initialValues = form.getValues();
 
     const updatedFields = initialValues.fields.map((field) => {
+      // Update the signature field itself
       if (field.formId === currentField?.formId) {
-        return {
-          ...field,
-          autosign,
-        };
+        return { ...field, autosign };
+      }
+
+      // Propagate autosign to DATE and Printed Name text fields for the same recipient
+      if (
+        currentField &&
+        field.recipientId === currentField.recipientId &&
+        (field.type === FieldType.DATE ||
+          (field.type === FieldType.TEXT &&
+            ZTextFieldMeta.safeParse(field.fieldMeta).data?.printedName))
+      ) {
+        return { ...field, autosign };
       }
 
       return field;
