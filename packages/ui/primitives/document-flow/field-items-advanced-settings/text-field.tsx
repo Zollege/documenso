@@ -14,6 +14,8 @@ import {
 import { Switch } from '@documenso/ui/primitives/switch';
 import { Textarea } from '@documenso/ui/primitives/textarea';
 
+import { textFormatValues } from './constants';
+
 type TextFieldAdvancedSettingsProps = {
   fieldState: TextFieldMeta;
   handleFieldChange: (key: keyof TextFieldMeta, value: string | boolean) => void;
@@ -100,6 +102,32 @@ export const TextFieldAdvancedSettings = ({
           value={fieldState.characterLimit}
           onChange={(e) => handleInput('characterLimit', e.target.value)}
         />
+      </div>
+
+      <div>
+        <Label>
+          <Trans>Text Format</Trans>
+        </Label>
+        <Select
+          value={fieldState.textFormat ?? '-1'}
+          onValueChange={(value) => {
+            handleFieldChange('textFormat', value === '-1' ? '' : value);
+          }}
+        >
+          <SelectTrigger className="mt-2 bg-background">
+            <SelectValue placeholder={t`Field format`} />
+          </SelectTrigger>
+          <SelectContent>
+            {textFormatValues.map((item, index) => (
+              <SelectItem key={index} value={item.value}>
+                {item.label}
+              </SelectItem>
+            ))}
+            <SelectItem value="-1">
+              <Trans>None</Trans>
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div>

@@ -1,3 +1,5 @@
+import { textFormatValues } from '@documenso/ui/primitives/document-flow/field-items-advanced-settings/constants';
+
 import type { TTextFieldMeta as TextFieldMeta } from '../types/field-meta';
 
 export const validateTextField = (
@@ -7,7 +9,7 @@ export const validateTextField = (
 ): string[] => {
   const errors = [];
 
-  const { characterLimit, readOnly, required, fontSize } = fieldMeta;
+  const { characterLimit, readOnly, required, fontSize, textFormat } = fieldMeta;
 
   if (required && !value && isSigningPage) {
     errors.push('Value is required');
@@ -15,6 +17,16 @@ export const validateTextField = (
 
   if (characterLimit !== undefined && characterLimit > 0 && value.length > characterLimit) {
     errors.push(`Value length (${value.length}) exceeds the character limit (${characterLimit})`);
+  }
+
+  if (textFormat && value.length > 0) {
+    const foundFormat = textFormatValues.find((item) => item.value === textFormat);
+
+    if (!foundFormat) {
+      errors.push(`Invalid text format - ${textFormat}`);
+    } else if (!foundFormat.regex.test(value)) {
+      errors.push(`Value does not match the required format (${foundFormat.label})`);
+    }
   }
 
   if (readOnly && value.length < 1) {

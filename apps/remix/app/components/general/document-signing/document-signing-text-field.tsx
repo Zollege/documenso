@@ -40,6 +40,7 @@ export type DocumentSigningTextFieldProps = {
 type ValidationErrors = {
   required: string[];
   characterLimit: string[];
+  textFormat: string[];
 };
 
 export type TextFieldProps = {
@@ -62,6 +63,7 @@ export const DocumentSigningTextField = ({
   const initialErrors: ValidationErrors = {
     required: [],
     characterLimit: [],
+    textFormat: [],
   };
   const [errors, setErrors] = useState(initialErrors);
   const userInputHasErrors = Object.values(errors).some((error) => error.length > 0);
@@ -103,6 +105,7 @@ export const DocumentSigningTextField = ({
       setErrors({
         required: validationErrors.filter((error) => error.includes('required')),
         characterLimit: validationErrors.filter((error) => error.includes('character limit')),
+        textFormat: validationErrors.filter((error) => error.includes('format')),
       });
     }
   };
@@ -118,6 +121,7 @@ export const DocumentSigningTextField = ({
         setErrors({
           required: validationErrors.filter((error) => error.includes('required')),
           characterLimit: validationErrors.filter((error) => error.includes('character limit')),
+          textFormat: validationErrors.filter((error) => error.includes('format')),
         });
         return;
       }
@@ -139,6 +143,7 @@ export const DocumentSigningTextField = ({
       setErrors({
         required: validationErrors.filter((error) => error.includes('required')),
         characterLimit: validationErrors.filter((error) => error.includes('character limit')),
+        textFormat: validationErrors.filter((error) => error.includes('format')),
       });
     }
 
@@ -279,7 +284,7 @@ export const DocumentSigningTextField = ({
           {parsedFieldMeta?.characterLimit !== undefined &&
             parsedFieldMeta?.characterLimit > 0 &&
             !userInputHasErrors && (
-              <div className="text-muted-foreground text-sm">
+              <div className="text-sm text-muted-foreground">
                 <Plural
                   value={charactersRemaining}
                   one="1 character remaining"
@@ -305,6 +310,11 @@ export const DocumentSigningTextField = ({
                       other="(# characters over)"
                     />
                   )}
+                </p>
+              ))}
+              {errors.textFormat.map((error, index) => (
+                <p key={index} className="text-red-500">
+                  {error}
                 </p>
               ))}
             </div>
