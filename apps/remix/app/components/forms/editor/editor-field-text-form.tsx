@@ -14,6 +14,7 @@ import {
   type TTextFieldMeta as TextFieldMeta,
   ZTextFieldMeta,
 } from '@documenso/lib/types/field-meta';
+import { textFormatValues } from '@documenso/ui/primitives/document-flow/field-items-advanced-settings/constants';
 import {
   Form,
   FormControl,
@@ -23,6 +24,13 @@ import {
   FormMessage,
 } from '@documenso/ui/primitives/form/form';
 import { Input } from '@documenso/ui/primitives/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@documenso/ui/primitives/select';
 import { Textarea } from '@documenso/ui/primitives/textarea';
 
 import {
@@ -40,6 +48,7 @@ const ZTextFieldFormSchema = ZTextFieldMeta.pick({
   placeholder: true,
   text: true,
   characterLimit: true,
+  textFormat: true,
   fontSize: true,
   textAlign: true,
   lineHeight: true,
@@ -81,6 +90,7 @@ export const EditorFieldTextForm = ({
       placeholder: value.placeholder || '',
       text: value.text || '',
       characterLimit: value.characterLimit || 0,
+      textFormat: value.textFormat ?? null,
       fontSize: value.fontSize || DEFAULT_FIELD_FONT_SIZE,
       textAlign: value.textAlign ?? FIELD_DEFAULT_GENERIC_ALIGN,
       lineHeight: value.lineHeight ?? FIELD_DEFAULT_LINE_HEIGHT,
@@ -217,6 +227,39 @@ export const EditorFieldTextForm = ({
                       }
                     }}
                   />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="textFormat"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  <Trans>Text format</Trans>
+                </FormLabel>
+                <FormControl>
+                  <Select
+                    value={field.value === null || field.value === undefined ? '-1' : field.value}
+                    onValueChange={(value) => field.onChange(value === '-1' ? null : value)}
+                  >
+                    <SelectTrigger className="w-full bg-background text-muted-foreground">
+                      <SelectValue placeholder={t`Field format`} />
+                    </SelectTrigger>
+                    <SelectContent position="popper">
+                      {textFormatValues.map((item, index) => (
+                        <SelectItem key={index} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="-1">
+                        <Trans>None</Trans>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -1,3 +1,36 @@
+export const textFormatValues = [
+  {
+    label: 'SSN (xxx-xx-xxxx)',
+    value: 'ssn',
+    regex: /^\d{3}-\d{2}-\d{4}$/,
+  },
+  {
+    label: 'US Phone ((xxx) xxx-xxxx)',
+    value: 'us-phone',
+    regex: /^\(\d{3}\) \d{3}-\d{4}$/,
+  },
+  {
+    label: 'Phone (xxx-xxx-xxxx)',
+    value: 'phone-dashes',
+    regex: /^\d{3}-\d{3}-\d{4}$/,
+  },
+  {
+    label: 'ZIP Code (xxxxx)',
+    value: 'zip',
+    regex: /^\d{5}$/,
+  },
+  {
+    label: 'ZIP+4 (xxxxx-xxxx)',
+    value: 'zip4',
+    regex: /^\d{5}-\d{4}$/,
+  },
+  {
+    label: 'Date (MM/DD/YYYY)',
+    value: 'date-us',
+    regex: /^\d{2}\/\d{2}\/\d{4}$/,
+  },
+];
+
 export const numberFormatValues = [
   {
     label: '123,456,789.00',
