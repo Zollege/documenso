@@ -18,7 +18,9 @@ import { createDocumentFromTemplate } from '@documenso/lib/server-only/template/
 import { createTemplateDirectLink } from '@documenso/lib/server-only/template/create-template-direct-link';
 import { deleteTemplate } from '@documenso/lib/server-only/template/delete-template';
 import { deleteTemplateDirectLink } from '@documenso/lib/server-only/template/delete-template-direct-link';
+import { findOrganisationTemplates } from '@documenso/lib/server-only/template/find-organisation-templates';
 import { findTemplates } from '@documenso/lib/server-only/template/find-templates';
+import { getOrganisationTemplateById } from '@documenso/lib/server-only/template/get-organisation-template-by-id';
 import { getTemplateById } from '@documenso/lib/server-only/template/get-template-by-id';
 import { replaceTemplatePdf } from '@documenso/lib/server-only/template/replace-template-pdf';
 import { toggleTemplateDirectLink } from '@documenso/lib/server-only/template/toggle-template-direct-link';
@@ -47,8 +49,11 @@ import {
   ZDeleteTemplateMutationSchema,
   ZDuplicateTemplateMutationSchema,
   ZDuplicateTemplateResponseSchema,
+  ZFindOrganisationTemplatesRequestSchema,
   ZFindTemplatesRequestSchema,
   ZFindTemplatesResponseSchema,
+  ZGetOrganisationTemplateByIdRequestSchema,
+  ZGetOrganisationTemplateByIdResponseSchema,
   ZGetTemplateByIdRequestSchema,
   ZGetTemplateByIdResponseSchema,
   ZReplaceTemplatePdfRequestSchema,
@@ -58,6 +63,7 @@ import {
   ZUpdateTemplateRequestSchema,
   ZUpdateTemplateResponseSchema,
 } from './schema';
+import { searchTemplateRoute } from './search-template';
 
 export const templateRouter = router({
   /**
@@ -125,6 +131,75 @@ export const templateRouter = router({
     }),
 
   /**
+   * @private
+   */
+  findOrganisationTemplates: authenticatedProcedure
+    .input(ZFindOrganisationTemplatesRequestSchema)
+    .output(ZFindTemplatesResponseSchema)
+    .query(async ({ input, ctx }) => {
+      const { teamId } = ctx;
+
+      const result = await findOrganisationTemplates({
+        userId: ctx.user.id,
+        teamId,
+        ...input,
+      });
+
+      // Remapping for backwards compatibility.
+      return {
+        ...result,
+        data: result.data.map((envelope) => {
+          const legacyTemplateId = mapSecondaryIdToTemplateId(envelope.secondaryId);
+
+          return {
+            id: legacyTemplateId,
+            envelopeId: envelope.id,
+            type: envelope.templateType,
+            visibility: envelope.visibility,
+            externalId: envelope.externalId,
+            title: envelope.title,
+            userId: envelope.userId,
+            teamId: envelope.teamId,
+            authOptions: envelope.authOptions,
+            createdAt: envelope.createdAt,
+            updatedAt: envelope.updatedAt,
+            publicTitle: envelope.publicTitle,
+            publicDescription: envelope.publicDescription,
+            folderId: envelope.folderId,
+            useLegacyFieldInsertion: envelope.useLegacyFieldInsertion,
+            team: envelope.team,
+            fields: envelope.fields.map((field) => mapFieldToLegacyField(field, envelope)),
+            recipients: envelope.recipients.map((recipient) =>
+              mapRecipientToLegacyRecipient(recipient, envelope),
+            ),
+            templateMeta: envelope.documentMeta,
+            directLink: envelope.directLink,
+          };
+        }),
+      };
+    }),
+
+  /**
+   * @private
+   */
+  getOrganisationTemplateById: authenticatedProcedure
+    .input(ZGetOrganisationTemplateByIdRequestSchema)
+    .output(ZGetOrganisationTemplateByIdResponseSchema)
+    .query(async ({ input, ctx }) => {
+      const { teamId } = ctx;
+      const { envelopeId } = input;
+
+      return await getOrganisationTemplateById({
+        id: {
+          type: 'envelopeId',
+          id: envelopeId,
+        },
+        userId: ctx.user.id,
+        teamId,
+      });
+    }),
+
+  /**
    * @public
    */
   getTemplateById: authenticatedProcedure
@@ -162,6 +237,8 @@ export const templateRouter = router({
    * @public
    */
   getMany: getTemplatesByIdsRoute,
+
+  search: searchTemplateRoute,
 
   /**
    * Wait until RR7 so we can passthrough documents.

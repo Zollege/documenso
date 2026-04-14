@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Trans, useLingui } from '@lingui/react/macro';
-import { DocumentVisibility, TeamMemberRole } from '@prisma/client';
-import { DocumentDistributionMethod, type Field, type Recipient } from '@prisma/client';
+import { DocumentVisibility, TeamMemberRole, TemplateType } from '@prisma/client';
+import { DocumentDistributionMethod, type Field } from '@prisma/client';
 import { InfoIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { match } from 'ts-pattern';
@@ -19,6 +19,7 @@ import { SUPPORTED_LANGUAGES } from '@documenso/lib/constants/i18n';
 import { DEFAULT_DOCUMENT_TIME_ZONE, TIME_ZONES } from '@documenso/lib/constants/time-zones';
 import { ZDocumentEmailSettingsSchema } from '@documenso/lib/types/document-email';
 import type { TDocumentMetaDateFormat } from '@documenso/lib/types/document-meta';
+import type { TRecipientLite } from '@documenso/lib/types/recipient';
 import type { TTemplate } from '@documenso/lib/types/template';
 import { extractDocumentAuthMethods } from '@documenso/lib/utils/document-auth';
 import { extractTeamSignatureSettings } from '@documenso/lib/utils/teams';
@@ -36,6 +37,10 @@ import {
   DocumentVisibilitySelect,
   DocumentVisibilityTooltip,
 } from '@documenso/ui/components/document/document-visibility-select';
+import {
+  TemplateTypeSelect,
+  TemplateTypeTooltip,
+} from '@documenso/ui/components/template/template-type-select';
 import {
   Accordion,
   AccordionContent,
@@ -78,7 +83,7 @@ import { ReplaceTemplatePdf } from './replace-template-pdf';
 
 export type AddTemplateSettingsFormProps = {
   documentFlow: DocumentFlowStep;
-  recipients: Recipient[];
+  recipients: TRecipientLite[];
   fields: Field[];
   isDocumentPdfLoaded: boolean;
   template: TTemplate;
@@ -110,6 +115,7 @@ export const AddTemplateSettingsFormPartial = ({
     defaultValues: {
       title: template.title,
       externalId: template.externalId || undefined,
+      templateType: template.type || TemplateType.PRIVATE,
       visibility: template.visibility || '',
       globalAccessAuth: documentAuthOption?.globalAccessAuth || [],
       globalActionAuth: documentAuthOption?.globalActionAuth || [],
@@ -333,6 +339,29 @@ export const AddTemplateSettingsFormPartial = ({
                 )}
               />
             )}
+
+            <FormField
+              control={form.control}
+              name="templateType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex flex-row items-center">
+                    <Trans>Template type</Trans>
+                    <TemplateTypeTooltip organisationTeamCount={organisation.teams.length} />
+                  </FormLabel>
+
+                  <FormControl>
+                    <TemplateTypeSelect
+                      {...field}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        void handleAutoSave();
+                      }}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
