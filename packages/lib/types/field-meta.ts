@@ -421,4 +421,4 @@ export const ZEnvelopeFieldAndMetaSchema = z.discriminatedUnion('type', [
   }),
 ]);
 
-type TEnvelopeFieldAndMeta = z.infer<typeof ZEnvelopeFieldAndMetaSchema>;
+export type TEnvelopeFieldAndMeta = z.infer<typeof ZEnvelopeFieldAndMetaSchema>;

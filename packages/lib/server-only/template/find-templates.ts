@@ -26,17 +26,6 @@ export const findTemplates = async ({
   folderId,
   query,
 }: FindTemplatesOptions) => {
-  const whereFilter: Prisma.EnvelopeWhereInput[] = [];
-
-  if (query && query.length > 0) {
-    whereFilter.push({
-      OR: [
-        { title: { contains: query, mode: 'insensitive' } },
-        { externalId: { contains: query, mode: 'insensitive' } },
-      ],
-    });
-  }
-
   const { teamRole } = await getMemberRoles({
     teamId,
     reference: {
@@ -45,63 +34,67 @@ export const findTemplates = async ({
     },
   });
 
-  whereFilter.push(
-    { teamId },
-    {
-      OR: [
-        {
-          visibility: {
-            in: TEAM_DOCUMENT_VISIBILITY_MAP[teamRole],
-          },
-        },
-        { userId, teamId },
-      ],
-    },
-  );
+  const queryFilters: Prisma.EnvelopeWhereInput[] = [];
 
-  if (folderId) {
-    whereFilter.push({ folderId });
-  } else {
-    whereFilter.push({ folderId: null });
+  if (query && query.length > 0) {
+    queryFilters.push({
+      OR: [
+        { title: { contains: query, mode: 'insensitive' } },
+        { externalId: { contains: query, mode: 'insensitive' } },
+      ],
+    });
   }
+
+  const where: Prisma.EnvelopeWhereInput = {
+    type: EnvelopeType.TEMPLATE,
+    templateType: type,
+    AND: [
+      { teamId },
+      {
+        OR: [
+          {
+            visibility: {
+              in: TEAM_DOCUMENT_VISIBILITY_MAP[teamRole],
+            },
+          },
+          { userId, teamId },
+        ],
+      },
+      folderId ? { folderId } : { folderId: null },
+      ...queryFilters,
+    ],
+  };
+
+  const templateInclude = {
+    team: {
+      select: {
+        id: true,
+        url: true,
+        name: true,
+      },
+    },
+    fields: true,
+    recipients: true,
+    documentMeta: true,
+    directLink: {
+      select: {
+        token: true,
+        enabled: true,
+      },
+    },
+  } as const;
 
   const [data, count] = await Promise.all([
     prisma.envelope.findMany({
-      where: {
-        type: EnvelopeType.TEMPLATE,
-        templateType: type,
-        AND: whereFilter,
-      },
-      include: {
-        team: {
-          select: {
-            id: true,
-            url: true,
-          },
-        },
-        fields: true,
-        recipients: true,
-        documentMeta: true,
-        directLink: {
-          select: {
-            token: true,
-            enabled: true,
-          },
-        },
-      },
+      where,
+      include: templateInclude,
       skip: Math.max(page - 1, 0) * perPage,
       take: perPage,
       orderBy: {
         createdAt: 'desc',
       },
     }),
-    prisma.envelope.count({
-      where: {
-        type: EnvelopeType.TEMPLATE,
-        templateType: type,
-        AND: whereFilter,
-      },
-    }),
+    prisma.envelope.count({ where }),
   ]);
 
   return {
