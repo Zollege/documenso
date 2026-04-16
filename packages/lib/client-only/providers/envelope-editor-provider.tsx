@@ -595,6 +595,7 @@ const mapLocalFieldsToFields = ({
       inserted: foundField?.inserted || false,
       customText: foundField?.customText || '',
       fieldMeta: field.fieldMeta || null,
+      autosign: field.autosign ?? foundField?.autosign ?? false,
     };
   });
 };
