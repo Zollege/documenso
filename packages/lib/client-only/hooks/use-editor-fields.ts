@@ -26,6 +26,7 @@ export const ZLocalFieldSchema = z.object({
   width: z.number().min(0),
   height: z.number().min(0),
   fieldMeta: ZFieldMetaSchema,
+  autosign: z.boolean().optional(),
 });
 
 export type TLocalField = z.infer<typeof ZLocalFieldSchema>;
