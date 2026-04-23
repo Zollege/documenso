@@ -7,7 +7,9 @@ import type { z } from 'zod';
 
 import { DEFAULT_SIGNATURE_TEXT_FONT_SIZE } from '@documenso/lib/constants/pdf';
 import { type TSignatureFieldMeta, ZSignatureFieldMeta } from '@documenso/lib/types/field-meta';
+import { Checkbox } from '@documenso/ui/primitives/checkbox';
 import { Form } from '@documenso/ui/primitives/form/form';
+import { Label } from '@documenso/ui/primitives/label';
 
 import { EditorGenericFontSizeField } from './editor-field-generic-field-forms';
 
@@ -20,6 +22,8 @@ type TSignatureFieldFormSchema = z.infer<typeof ZSignatureFieldFormSchema>;
 type EditorFieldSignatureFormProps = {
   value: TSignatureFieldMeta | undefined;
   onValueChange: (value: TSignatureFieldMeta) => void;
+  autosign?: boolean;
+  onAutosignChange?: (value: boolean) => void;
 };
 
 export const EditorFieldSignatureForm = ({
@@ -27,6 +31,8 @@ export const EditorFieldSignatureForm = ({
     type: 'signature',
   },
   onValueChange,
+  autosign = false,
+  onAutosignChange,
 }: EditorFieldSignatureFormProps) => {
   const form = useForm<TSignatureFieldFormSchema>({
     resolver: zodResolver(ZSignatureFieldFormSchema),
@@ -60,10 +66,31 @@ export const EditorFieldSignatureForm = ({
         <fieldset className="flex flex-col gap-2">
           <div>
             <EditorGenericFontSizeField formControl={form.control} />
-            <p className="text-muted-foreground mt-0.5 text-xs">
+            <p className="mt-0.5 text-xs text-muted-foreground">
               <Trans>The typed signature font size</Trans>
             </p>
           </div>
+
+          {onAutosignChange && (
+            <div className="mt-1">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="autosign"
+                  checked={autosign}
+                  onCheckedChange={(checked) => onAutosignChange(checked === true)}
+                />
+                <Label htmlFor="autosign" className="cursor-pointer text-xs text-foreground/70">
+                  <Trans>Automatically sign this field</Trans>
+                </Label>
+              </div>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                <Trans>
+                  When enabled, this signature field will be automatically signed when the document
+                  is sent to the recipient.
+                </Trans>
+              </p>
+            </div>
+          )}
         </fieldset>
       </form>
     </Form>

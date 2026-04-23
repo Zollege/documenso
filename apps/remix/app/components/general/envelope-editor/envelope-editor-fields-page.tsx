@@ -112,6 +112,16 @@ export const EnvelopeEditorFieldsPage = () => {
     }
   };
 
+  const updateSelectedFieldAutosign = (autosign: boolean) => {
+    if (!selectedField) {
+      return;
+    }
+
+    editorFields.updateFieldByFormId(selectedField.formId, {
+      autosign,
+    });
+  };
+
   const onFieldDetectionComplete = (fields: NormalizedFieldWithContext[]) => {
     for (const field of fields) {
       editorFields.addField({
@@ -392,6 +402,8 @@ export const EnvelopeEditorFieldsPage = () => {
                       <EditorFieldSignatureForm
                         value={selectedField?.fieldMeta as TSignatureFieldMeta | undefined}
                         onValueChange={(value) => updateSelectedFieldMeta(value)}
+                        autosign={selectedField?.autosign}
+                        onAutosignChange={updateSelectedFieldAutosign}
                       />
                     ))
                     .with(FieldType.CHECKBOX, () => (

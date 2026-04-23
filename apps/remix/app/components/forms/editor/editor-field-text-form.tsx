@@ -14,6 +14,7 @@ import {
   type TTextFieldMeta as TextFieldMeta,
   ZTextFieldMeta,
 } from '@documenso/lib/types/field-meta';
+import { Checkbox } from '@documenso/ui/primitives/checkbox';
 import { textFormatValues } from '@documenso/ui/primitives/document-flow/field-items-advanced-settings/constants';
 import {
   Form,
@@ -56,6 +57,7 @@ const ZTextFieldFormSchema = ZTextFieldMeta.pick({
   verticalAlign: true,
   required: true,
   readOnly: true,
+  printedName: true,
 }).refine(
   (data) => {
     // A read-only field must have text
@@ -98,6 +100,7 @@ export const EditorFieldTextForm = ({
       verticalAlign: value.verticalAlign ?? FIELD_DEFAULT_GENERIC_VERTICAL_ALIGN,
       required: value.required || false,
       readOnly: value.readOnly || false,
+      printedName: value.printedName || false,
     },
   });
 
@@ -283,6 +286,32 @@ export const EditorFieldTextForm = ({
           </div>
 
           <EditorGenericReadOnlyField formControl={form.control} />
+
+          <FormField
+            control={form.control}
+            name="printedName"
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormControl>
+                  <div className="flex items-center">
+                    <Checkbox
+                      data-testid="field-form-printedName"
+                      id="field-printed-name"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <label
+                      className="ml-2 text-sm text-muted-foreground"
+                      htmlFor="field-printed-name"
+                    >
+                      <Trans>Printed Name</Trans>
+                    </label>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </fieldset>
       </form>
     </Form>
