@@ -176,6 +176,8 @@ export const DocumentSigningCompleteDialog = ({
           : undefined;
 
       await onSignatureComplete(nextSigner, data.accessAuthOptions, recipientOverridePayload);
+
+      setShowDialog(false);
     } catch (error) {
       const err = AppError.parseError(error);
 
