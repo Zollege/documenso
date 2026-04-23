@@ -37,6 +37,7 @@ export type UpdateEnvelopeOptions = {
     publicDescription?: string;
     templateType?: TemplateType;
     useLegacyFieldInsertion?: boolean;
+    internalVersion?: 1 | 2;
   };
   meta?: Partial<Omit<DocumentMeta, 'id'>>;
   requestMetadata: ApiRequestMetadata;
@@ -331,6 +332,7 @@ export const updateEnvelope = async ({
         publicDescription: data.publicDescription,
         publicTitle: data.publicTitle,
         useLegacyFieldInsertion: data.useLegacyFieldInsertion,
+        internalVersion: data.internalVersion,
         authOptions,
         folder: folderUpdateQuery,
         documentMeta: {
