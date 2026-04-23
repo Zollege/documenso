@@ -89,6 +89,7 @@ export const useEditorFields = ({
         height: Number(field.height),
         recipientId: field.recipientId,
         fieldMeta: field.fieldMeta ? ZFieldMetaSchema.parse(field.fieldMeta) : undefined,
+        autosign: field.autosign ?? undefined,
       }),
     );
 
