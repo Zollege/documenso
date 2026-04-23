@@ -35,6 +35,7 @@ export const ZUpdateEnvelopeRequestSchema = z.object({
       globalActionAuth: z.array(ZDocumentActionAuthTypesSchema).optional(),
       folderId: z.string().nullish(),
       templateType: z.nativeEnum(TemplateType).optional(),
+      internalVersion: z.union([z.literal(1), z.literal(2)]).optional(),
     })
     .optional(),
   meta: ZDocumentMetaUpdateSchema.optional(),
