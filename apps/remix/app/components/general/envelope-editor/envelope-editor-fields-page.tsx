@@ -27,6 +27,7 @@ import {
   type TRadioFieldMeta,
   type TSignatureFieldMeta,
   type TTextFieldMeta,
+  ZTextFieldMeta,
 } from '@documenso/lib/types/field-meta';
 import { getEnvelopeItemPermissions } from '@documenso/lib/utils/envelope';
 import { canRecipientFieldsBeModified } from '@documenso/lib/utils/recipients';
@@ -106,9 +107,35 @@ export const EnvelopeEditorFieldsPage = () => {
     const isMetaSame = isDeepEqual(selectedField.fieldMeta, fieldMeta);
 
     if (!isMetaSame) {
-      editorFields.updateFieldByFormId(selectedField.formId, {
-        fieldMeta,
-      });
+      const update: Parameters<typeof editorFields.updateFieldByFormId>[1] = { fieldMeta };
+
+      // When printedName is toggled on a TEXT field, inherit autosign from any same-recipient
+      // signature field that already has autosign enabled.
+      if (selectedField.type === FieldType.TEXT) {
+        const newPrintedName = ZTextFieldMeta.safeParse(fieldMeta).data?.printedName ?? false;
+        const oldPrintedName =
+          ZTextFieldMeta.safeParse(selectedField.fieldMeta).data?.printedName ?? false;
+
+        if (newPrintedName !== oldPrintedName) {
+          if (newPrintedName) {
+            const recipientHasAutosignSignature = editorFields.localFields.some(
+              (f) =>
+                f.formId !== selectedField.formId &&
+                f.recipientId === selectedField.recipientId &&
+                (f.type === FieldType.SIGNATURE || f.type === FieldType.FREE_SIGNATURE) &&
+                f.autosign,
+            );
+
+            if (recipientHasAutosignSignature) {
+              update.autosign = true;
+            }
+          } else {
+            update.autosign = false;
+          }
+        }
+      }
+
+      editorFields.updateFieldByFormId(selectedField.formId, update);
     }
   };
 
@@ -117,9 +144,25 @@ export const EnvelopeEditorFieldsPage = () => {
       return;
     }
 
-    editorFields.updateFieldByFormId(selectedField.formId, {
-      autosign,
-    });
+    editorFields.updateFieldByFormId(selectedField.formId, { autosign });
+
+    // Propagate autosign to DATE and Printed Name text fields for the same recipient
+    for (const field of editorFields.localFields) {
+      if (
+        field.formId === selectedField.formId ||
+        field.recipientId !== selectedField.recipientId
+      ) {
+        continue;
+      }
+
+      if (
+        field.type === FieldType.DATE ||
+        (field.type === FieldType.TEXT &&
+          ZTextFieldMeta.safeParse(field.fieldMeta).data?.printedName)
+      ) {
+        editorFields.updateFieldByFormId(field.formId, { autosign });
+      }
+    }
   };
 
   const onFieldDetectionComplete = (fields: NormalizedFieldWithContext[]) => {
