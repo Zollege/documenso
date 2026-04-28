@@ -30,6 +30,7 @@ export interface UpdateEnvelopeFieldsOptions {
     width?: number;
     height?: number;
     fieldMeta?: TFieldMetaSchema;
+    autosign?: boolean;
   }[];
   requestMetadata: ApiRequestMetadata;
 }
@@ -144,6 +145,7 @@ export const updateEnvelopeFields = async ({
             height: updateData.height,
             fieldMeta: updateData.fieldMeta,
             envelopeItemId: updateData.envelopeItemId,
+            autosign: updateData.autosign,
           },
         });
 

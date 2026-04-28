@@ -25,6 +25,10 @@ const ZUpdateFieldBaseSchema = ZEnvelopeFieldAndMetaSchema.and(
       .describe(
         'The ID of the envelope item to put the field on. If not provided, field will be placed on the first item.',
       ),
+    autosign: z
+      .boolean()
+      .optional()
+      .describe('Whether this signature field should be automatically signed by the recipient.'),
   }),
 );
 
