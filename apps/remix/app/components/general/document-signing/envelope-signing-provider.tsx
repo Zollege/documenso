@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 import {
   EnvelopeType,
@@ -142,6 +142,17 @@ export const EnvelopeSigningProvider = ({
   children,
 }: EnvelopeSigningProviderProps) => {
   const [envelopeData, setEnvelopeData] = useState(() => prefillDateFields(initialEnvelopeData));
+
+  // Sync completion/rejection flags when loader data revalidates.
+  // useState ignores prop changes after mount, so this effect catches updates
+  // that arrive after completeDocumentWithToken triggers a Remix revalidation.
+  useEffect(() => {
+    setEnvelopeData((prev) => ({
+      ...prev,
+      isCompleted: initialEnvelopeData.isCompleted,
+      isRejected: initialEnvelopeData.isRejected,
+    }));
+  }, [initialEnvelopeData.isCompleted, initialEnvelopeData.isRejected]);
 
   const { envelope, recipient } = envelopeData;
 
