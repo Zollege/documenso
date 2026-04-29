@@ -54,7 +54,11 @@ export const EnvelopePdfViewer = ({
 
   return (
     <PDFViewerLazy
-      key={`${currentEnvelopeItem.envelopeId}-${currentEnvelopeItem.id}`}
+      key={
+        typeof currentEnvelopeItem.data === 'string'
+          ? `${currentEnvelopeItem.envelopeId}-${currentEnvelopeItem.id}-${currentEnvelopeItem.data}`
+          : `${currentEnvelopeItem.envelopeId}-${currentEnvelopeItem.id}`
+      }
       {...props}
       className={cn('h-full w-full max-w-[800px]', className)}
       data={currentEnvelopeItem.data}
