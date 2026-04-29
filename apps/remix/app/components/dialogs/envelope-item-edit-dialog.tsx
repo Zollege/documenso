@@ -78,22 +78,7 @@ export const EnvelopeItemEditDialog = ({
     },
   });
 
-  const { mutateAsync: replaceEnvelopeItemPdf } = trpc.envelope.item.replacePdf.useMutation({
-    onSuccess: ({ data, fields }) => {
-      setLocalEnvelope({
-        envelopeItems: envelope.envelopeItems.map((item) =>
-          item.id === data.id
-            ? { ...item, documentDataId: data.documentDataId, title: data.title }
-            : item,
-        ),
-      });
-
-      if (fields) {
-        setLocalEnvelope({ fields });
-        editorFields.resetForm(fields);
-      }
-    },
-  });
+  const { mutateAsync: replaceEnvelopeItemPdf } = trpc.envelope.item.replacePdf.useMutation();
 
   const fieldsOnExcessPages =
     replacementFile !== null
@@ -188,7 +173,20 @@ export const EnvelopeItemEditDialog = ({
         formData.append('payload', JSON.stringify(payload));
         formData.append('file', file);
 
-        await replaceEnvelopeItemPdf(formData);
+        const { data: updatedItem, fields } = await replaceEnvelopeItemPdf(formData);
+
+        setLocalEnvelope({
+          envelopeItems: envelope.envelopeItems.map((item) =>
+            item.id === updatedItem.id
+              ? { ...item, documentDataId: updatedItem.documentDataId, title: updatedItem.title }
+              : item,
+          ),
+        });
+
+        if (fields) {
+          setLocalEnvelope({ fields });
+          editorFields.resetForm(fields);
+        }
       }
 
       setIsOpen(false);
