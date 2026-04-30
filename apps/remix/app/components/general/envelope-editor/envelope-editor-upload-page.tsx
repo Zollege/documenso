@@ -143,10 +143,12 @@ export const EnvelopeEditorUploadPage = () => {
 
   const { mutateAsync: replaceEnvelopeItemPdf } = trpc.envelope.item.replacePdf.useMutation({
     onSuccess: ({ data, fields }) => {
-      // Update the envelope item with the new documentDataId.
+      // Update the envelope item with the new documentDataId and title.
       setLocalEnvelope({
         envelopeItems: envelope.envelopeItems.map((item) =>
-          item.id === data.id ? { ...item, documentDataId: data.documentDataId } : item,
+          item.id === data.id
+            ? { ...item, documentDataId: data.documentDataId, title: data.title }
+            : item,
         ),
       });
 
@@ -256,6 +258,8 @@ export const EnvelopeEditorUploadPage = () => {
       prev.map((f) => (f.envelopeItemId === envelopeItemId ? { ...f, isReplacing: true } : f)),
     );
 
+    let succeeded = false;
+
     try {
       if (isEmbedded) {
         // For embedded mode, store the file data locally on the envelope item.
@@ -275,13 +279,14 @@ export const EnvelopeEditorUploadPage = () => {
 
         setLocalEnvelope({
           envelopeItems: envelope.envelopeItems.map((item) =>
-            item.id === envelopeItemId ? { ...item, data } : item,
+            item.id === envelopeItemId ? { ...item, data, title: file.name } : item,
           ),
           fields: remainingFields,
         });
 
         editorFields.resetForm(remainingFields);
 
+        succeeded = true;
         return;
       }
 
@@ -289,6 +294,7 @@ export const EnvelopeEditorUploadPage = () => {
       const payload = {
         envelopeId: envelope.id,
         envelopeItemId,
+        title: file.name,
       } satisfies TReplaceEnvelopeItemPdfPayload;
 
       const formData = new FormData();
@@ -299,6 +305,7 @@ export const EnvelopeEditorUploadPage = () => {
       registerPendingMutation(replacePromise);
 
       await replacePromise;
+      succeeded = true;
     } catch (error) {
       console.error(error);
 
@@ -310,7 +317,11 @@ export const EnvelopeEditorUploadPage = () => {
       });
     } finally {
       setLocalFiles((prev) =>
-        prev.map((f) => (f.envelopeItemId === envelopeItemId ? { ...f, isReplacing: false } : f)),
+        prev.map((f) =>
+          f.envelopeItemId === envelopeItemId
+            ? { ...f, isReplacing: false, ...(succeeded ? { title: file.name } : {}) }
+            : f,
+        ),
       );
     }
   };
