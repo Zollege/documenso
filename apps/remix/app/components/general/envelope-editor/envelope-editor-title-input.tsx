@@ -27,6 +27,11 @@ export const EnvelopeItemTitleInput = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
 
+  // Sync internal state when the parent updates the value externally (e.g. after PDF replace).
+  useEffect(() => {
+    setEnvelopeItemTitle(value);
+  }, [value]);
+
   // Update input width based on content
   useEffect(() => {
     if (measureRef.current) {
