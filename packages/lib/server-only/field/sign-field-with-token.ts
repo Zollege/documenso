@@ -1,5 +1,4 @@
 import { DocumentStatus, FieldType, RecipientRole, SigningStatus } from '@prisma/client';
-import { DateTime } from 'luxon';
 import { isDeepEqual } from 'remeda';
 import { match } from 'ts-pattern';
 
@@ -12,8 +11,6 @@ import { fromCheckboxValue } from '@documenso/lib/universal/field-checkbox';
 import { prisma } from '@documenso/prisma';
 
 import { AUTO_SIGNABLE_FIELD_TYPES } from '../../constants/autosign';
-import { DEFAULT_DOCUMENT_DATE_FORMAT } from '../../constants/date-formats';
-import { DEFAULT_DOCUMENT_TIME_ZONE } from '../../constants/time-zones';
 import { DOCUMENT_AUDIT_LOG_TYPE } from '../../types/document-audit-logs';
 import type { TRecipientActionAuth } from '../../types/document-auth';
 import {
@@ -24,6 +21,7 @@ import {
   ZTextFieldMeta,
 } from '../../types/field-meta';
 import type { RequestMetadata } from '../../universal/extract-request-metadata';
+import { getDateFieldValue } from '../../utils/date-field-value';
 import { createDocumentAuditLogData } from '../../utils/document-audit-logs';
 import { assertRecipientNotExpired } from '../../utils/recipients';
 import { validateFieldAuth } from '../document/validate-field-auth';
@@ -205,9 +203,11 @@ export const signFieldWithToken = async ({
   const typedSignature = isSignatureField && !isBase64 ? value : undefined;
 
   if (field.type === FieldType.DATE) {
-    customText = DateTime.now()
-      .setZone(documentMeta?.timezone ?? DEFAULT_DOCUMENT_TIME_ZONE)
-      .toFormat(documentMeta?.dateFormat ?? DEFAULT_DOCUMENT_DATE_FORMAT);
+    customText = getDateFieldValue({
+      fieldMeta: field.fieldMeta,
+      timezone: documentMeta?.timezone,
+      dateFormat: documentMeta?.dateFormat,
+    });
   }
 
   if (isSignatureField && !signatureImageAsBase64 && !typedSignature) {

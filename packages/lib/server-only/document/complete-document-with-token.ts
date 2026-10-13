@@ -10,8 +10,6 @@ import {
 } from '@prisma/client';
 import { DateTime } from 'luxon';
 
-import { DEFAULT_DOCUMENT_DATE_FORMAT } from '@documenso/lib/constants/date-formats';
-import { DEFAULT_DOCUMENT_TIME_ZONE } from '@documenso/lib/constants/time-zones';
 import {
   DOCUMENT_AUDIT_LOG_TYPE,
   RECIPIENT_DIFF_TYPE,
@@ -19,6 +17,7 @@ import {
 import { ZTextFieldMeta } from '@documenso/lib/types/field-meta';
 import type { RequestMetadata } from '@documenso/lib/universal/extract-request-metadata';
 import { fieldsContainUnsignedRequiredField } from '@documenso/lib/utils/advanced-fields-helpers';
+import { getDateFieldValue } from '@documenso/lib/utils/date-field-value';
 import { createDocumentAuditLogData } from '@documenso/lib/utils/document-audit-logs';
 import { prisma } from '@documenso/prisma';
 
@@ -225,25 +224,37 @@ export const completeDocumentWithToken = async ({
 
   // Auto-insert all un-inserted date fields for V2 envelopes at completion time.
   if (envelope.internalVersion === 2 && uninsertedDateFields.length > 0) {
-    const formattedDate = DateTime.now()
-      .setZone(envelope.documentMeta?.timezone ?? DEFAULT_DOCUMENT_TIME_ZONE)
-      .toFormat(envelope.documentMeta?.dateFormat ?? DEFAULT_DOCUMENT_DATE_FORMAT);
+    // Usually every date gets the same value, the completion moment, but a date
+    // field with a business-day offset is stamped with a later date - so values
+    // are worked out per field and written in one update per distinct value.
+    const now = DateTime.now();
+    const dateFieldValues = new Map(
+      uninsertedDateFields.map((field) => [
+        field.id,
+        getDateFieldValue({
+          fieldMeta: field.fieldMeta,
+          timezone: envelope.documentMeta?.timezone,
+          dateFormat: envelope.documentMeta?.dateFormat,
+          now,
+        }),
+      ]),
+    );
 
-    const newDateFieldValues = {
-      customText: formattedDate,
-      inserted: true,
-    };
-
-    await prisma.field.updateMany({
-      where: {
-        id: {
-          in: uninsertedDateFields.map((field) => field.id),
+    for (const formattedDate of new Set(dateFieldValues.values())) {
+      await prisma.field.updateMany({
+        where: {
+          id: {
+            in: uninsertedDateFields
+              .filter((field) => dateFieldValues.get(field.id) === formattedDate)
+              .map((field) => field.id),
+          },
         },
-      },
-      data: {
-        ...newDateFieldValues,
-      },
-    });
+        data: {
+          customText: formattedDate,
+          inserted: true,
+        },
+      });
+    }
 
     // Create audit log entries for each auto-inserted date field.
     await prisma.documentAuditLog.createMany({
@@ -264,7 +275,7 @@ export const completeDocumentWithToken = async ({
             fieldId: field.secondaryId,
             field: {
               type: FieldType.DATE,
-              data: formattedDate,
+              data: dateFieldValues.get(field.id) ?? '',
             },
           },
         }),
@@ -276,7 +287,8 @@ export const completeDocumentWithToken = async ({
       if (field.type === FieldType.DATE && !field.inserted) {
         return {
           ...field,
-          ...newDateFieldValues,
+          customText: dateFieldValues.get(field.id) ?? '',
+          inserted: true,
         };
       }
 
@@ -416,9 +428,11 @@ export const completeDocumentWithToken = async ({
         let customText: string | undefined;
 
         if (field.type === FieldType.DATE) {
-          customText = DateTime.now()
-            .setZone(envelope.documentMeta?.timezone ?? DEFAULT_DOCUMENT_TIME_ZONE)
-            .toFormat(envelope.documentMeta?.dateFormat ?? DEFAULT_DOCUMENT_DATE_FORMAT);
+          customText = getDateFieldValue({
+            fieldMeta: field.fieldMeta,
+            timezone: envelope.documentMeta?.timezone,
+            dateFormat: envelope.documentMeta?.dateFormat,
+          });
         } else if (field.type === FieldType.TEXT) {
           const parsedMeta = ZTextFieldMeta.safeParse(field.fieldMeta);
           if (parsedMeta.success && parsedMeta.data.printedName) {

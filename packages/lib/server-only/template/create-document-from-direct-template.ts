@@ -11,7 +11,6 @@ import {
   SigningStatus,
   WebhookTriggerEvents,
 } from '@prisma/client';
-import { DateTime } from 'luxon';
 import { match } from 'ts-pattern';
 import { z } from 'zod';
 
@@ -34,6 +33,7 @@ import type { ApiRequestMetadata } from '../../universal/extract-request-metadat
 import { getFileServerSide } from '../../universal/upload/get-file.server';
 import { putPdfFileServerSide } from '../../universal/upload/put-file.server';
 import { isRequiredField } from '../../utils/advanced-fields-helpers';
+import { getDateFieldValue } from '../../utils/date-field-value';
 import { extractDerivedDocumentMeta } from '../../utils/document';
 import type { CreateDocumentAuditLogDataResponse } from '../../utils/document-audit-logs';
 import { createDocumentAuditLogData } from '../../utils/document-audit-logs';
@@ -264,9 +264,11 @@ export const createDocumentFromDirectTemplate = async ({
       const typedSignature = isSignatureField && !isBase64 ? value : undefined;
 
       if (templateField.type === FieldType.DATE) {
-        customText = DateTime.now()
-          .setZone(derivedDocumentMeta.timezone)
-          .toFormat(derivedDocumentMeta.dateFormat);
+        customText = getDateFieldValue({
+          fieldMeta: templateField.fieldMeta,
+          timezone: derivedDocumentMeta.timezone,
+          dateFormat: derivedDocumentMeta.dateFormat,
+        });
       }
 
       if (isSignatureField && !signatureImageAsBase64 && !typedSignature) {
