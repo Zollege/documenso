@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Trans } from '@lingui/react/macro';
 import { useForm, useWatch } from 'react-hook-form';
 import type { z } from 'zod';
 
@@ -10,7 +11,16 @@ import {
   FIELD_DEFAULT_GENERIC_ALIGN,
   ZDateFieldMeta,
 } from '@documenso/lib/types/field-meta';
-import { Form } from '@documenso/ui/primitives/form/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@documenso/ui/primitives/form/form';
+import { Input } from '@documenso/ui/primitives/input';
 
 import {
   EditorGenericFontSizeField,
@@ -20,6 +30,7 @@ import {
 const ZDateFieldFormSchema = ZDateFieldMeta.pick({
   fontSize: true,
   textAlign: true,
+  businessDaysOffset: true,
 });
 
 type TDateFieldFormSchema = z.infer<typeof ZDateFieldFormSchema>;
@@ -41,6 +52,7 @@ export const EditorFieldDateForm = ({
     defaultValues: {
       fontSize: value.fontSize || DEFAULT_FIELD_FONT_SIZE,
       textAlign: value.textAlign ?? FIELD_DEFAULT_GENERIC_ALIGN,
+      businessDaysOffset: value.businessDaysOffset,
     },
   });
 
@@ -69,6 +81,40 @@ export const EditorFieldDateForm = ({
           <EditorGenericFontSizeField formControl={form.control} />
 
           <EditorGenericTextAlignField formControl={form.control} />
+
+          <FormField
+            control={form.control}
+            name="businessDaysOffset"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  <Trans>Business days after signing</Trans>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    data-testid="field-form-businessDaysOffset"
+                    type="number"
+                    min={0}
+                    max={30}
+                    className="bg-background"
+                    placeholder="0"
+                    {...field}
+                    value={field.value ?? ''}
+                    onChange={(e) => {
+                      field.onChange(e.target.value === '' ? undefined : Number(e.target.value));
+                    }}
+                  />
+                </FormControl>
+                <FormDescription>
+                  <Trans>
+                    Fill in the date this many business days after signing, skipping weekends and US
+                    federal holidays. Leave empty for the signing date.
+                  </Trans>
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </fieldset>
       </form>
     </Form>

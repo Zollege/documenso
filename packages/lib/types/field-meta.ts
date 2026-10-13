@@ -79,6 +79,11 @@ export type TEmailFieldMeta = z.infer<typeof ZEmailFieldMeta>;
 export const ZDateFieldMeta = ZBaseFieldMeta.extend({
   type: z.literal('date'),
   textAlign: ZFieldTextAlignSchema.optional(),
+  /**
+   * Stamp the date this many business days after signing instead of the signing
+   * date itself. See utils/date-field-value.ts.
+   */
+  businessDaysOffset: z.coerce.number().int().min(0).max(30).optional(),
 });
 
 export type TDateFieldMeta = z.infer<typeof ZDateFieldMeta>;

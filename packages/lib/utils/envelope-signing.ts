@@ -1,6 +1,5 @@
 import type { Field } from '@prisma/client';
 import { FieldType } from '@prisma/client';
-import { DateTime } from 'luxon';
 import { P, match } from 'ts-pattern';
 import { z } from 'zod';
 
@@ -8,9 +7,7 @@ import { validateCheckboxLength } from '@documenso/lib/advanced-fields-validatio
 import { validateDropdownField } from '@documenso/lib/advanced-fields-validation/validate-dropdown';
 import { validateNumberField } from '@documenso/lib/advanced-fields-validation/validate-number';
 import { validateTextField } from '@documenso/lib/advanced-fields-validation/validate-text';
-import { DEFAULT_DOCUMENT_DATE_FORMAT } from '@documenso/lib/constants/date-formats';
 import { isBase64Image } from '@documenso/lib/constants/signatures';
-import { DEFAULT_DOCUMENT_TIME_ZONE } from '@documenso/lib/constants/time-zones';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
 import type { TDocumentMeta } from '@documenso/lib/types/document-meta';
 import {
@@ -20,6 +17,7 @@ import {
   ZRadioFieldMeta,
   ZTextFieldMeta,
 } from '@documenso/lib/types/field-meta';
+import { getDateFieldValue } from '@documenso/lib/utils/date-field-value';
 import { toCheckboxCustomText, toRadioCustomText } from '@documenso/lib/utils/fields';
 import { zEmail } from '@documenso/lib/utils/zod';
 import type { TSignEnvelopeFieldValue } from '@documenso/trpc/server/envelope-router/sign-envelope-field.types';
@@ -88,9 +86,11 @@ export const extractFieldInsertionValues = ({
       }
 
       return {
-        customText: DateTime.now()
-          .setZone(documentMeta.timezone ?? DEFAULT_DOCUMENT_TIME_ZONE)
-          .toFormat(documentMeta.dateFormat ?? DEFAULT_DOCUMENT_DATE_FORMAT),
+        customText: getDateFieldValue({
+          fieldMeta: field.fieldMeta,
+          timezone: documentMeta.timezone,
+          dateFormat: documentMeta.dateFormat,
+        }),
         inserted: true,
       };
     })
