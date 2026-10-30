@@ -1,8 +1,26 @@
-export const textFormatValues = [
+/**
+ * A number the SSA could have issued, or an ITIN.
+ *
+ * The SSA never issues area 000, 666 or 900-999, group 00 or serial 0000, and
+ * voided 078-05-1120 and 219-09-9999 after they were printed on sample cards.
+ * Area 9xx belongs to the IRS's ITINs, whose group is 50-65, 70-88, 90-92 or
+ * 94-99.
+ */
+const SSN_OR_ITIN_REGEX =
+  /^(?!078-05-1120$|219-09-9999$)(?:(?!000|666|9)\d{3}-(?!00)\d{2}-(?!0000)\d{4}|9\d{2}-(?:5\d|6[0-5]|7\d|8[0-8]|9[0-24-9])-\d{4})$/;
+
+export const textFormatValues: {
+  label: string;
+  value: string;
+  regex: RegExp;
+  // The signing dialog files an error under the format by looking for "format" in it.
+  errorMessage?: string;
+}[] = [
   {
     label: 'SSN (xxx-xx-xxxx)',
     value: 'ssn',
-    regex: /^\d{3}-\d{2}-\d{4}$/,
+    regex: SSN_OR_ITIN_REGEX,
+    errorMessage: 'Enter a valid Social Security number or ITIN in the format xxx-xx-xxxx',
   },
   {
     label: 'US Phone ((xxx) xxx-xxxx)',
