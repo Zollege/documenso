@@ -25,7 +25,10 @@ export const validateTextField = (
     if (!foundFormat) {
       errors.push(`Invalid text format - ${textFormat}`);
     } else if (!foundFormat.regex.test(value)) {
-      errors.push(`Value does not match the required format (${foundFormat.label})`);
+      errors.push(
+        foundFormat.errorMessage ??
+          `Value does not match the required format (${foundFormat.label})`,
+      );
     }
   }
 
