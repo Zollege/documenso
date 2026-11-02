@@ -67,4 +67,5 @@ printf "🗄️  Running database migrations...\n"
 npx prisma migrate deploy --schema ../../packages/prisma/schema.prisma
 
 printf "🌟 Starting Documenso server...\n"
-HOSTNAME=0.0.0.0 node build/server/main.js
+# Preload Aikido Zen (in-app firewall). The server is native ESM, so it must be loaded with -r.
+HOSTNAME=0.0.0.0 node -r @aikidosec/firewall/instrument build/server/main.js
