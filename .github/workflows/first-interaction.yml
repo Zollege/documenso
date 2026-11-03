@@ -13,7 +13,7 @@ permissions:
 jobs:
   welcome-message:
     name: Welcome Contributors
-    if: github.event.action == 'opened'
+    if: github.repository == 'documenso/documenso' && github.event.action == 'opened'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

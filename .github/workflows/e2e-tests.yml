@@ -13,7 +13,8 @@ jobs:
   e2e_tests:
     name: 'E2E Tests'
     timeout-minutes: 60
-    runs-on: warp-ubuntu-2204-x64-8x
+    # warp-* runners only exist in upstream; forks fall back to GitHub-hosted runners.
+    runs-on: ${{ github.repository == 'documenso/documenso' && 'warp-ubuntu-2204-x64-8x' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
 

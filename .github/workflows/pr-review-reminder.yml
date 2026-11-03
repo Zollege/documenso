@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   checkPRs:
-    if: ${{ github.event.pull_request.user.login }} && github.event.action == ('opened' || 'ready_for_review')
+    if: github.repository == 'documenso/documenso' && github.event.pull_request.user.login && (github.event.action == 'opened' || github.event.action == 'ready_for_review')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

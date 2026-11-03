@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   countIssues:
-    if: ${{ github.event.issue.assignee }} && github.event.action == 'assigned' && github.event.sender.type == 'User'
+    if: github.repository == 'documenso/documenso' && github.event.issue.assignee && github.event.action == 'assigned' && github.event.sender.type == 'User'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
