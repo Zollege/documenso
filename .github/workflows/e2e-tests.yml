@@ -12,6 +12,9 @@ concurrency:
 jobs:
   e2e_tests:
     name: 'E2E Tests'
+    # Upstream-only for now: needs warp-* runners, and the dev compose on this
+    # fork's main still pulls minio/minio, which is no longer on Docker Hub.
+    if: github.repository == 'documenso/documenso'
     timeout-minutes: 60
     runs-on: warp-ubuntu-2204-x64-8x
     steps:
