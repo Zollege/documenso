@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { Trans, useLingui } from '@lingui/react/macro';
-import { type Control, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 
 import { FIELD_MIN_LINE_HEIGHT } from '@documenso/lib/types/field-meta';
 import { FIELD_MAX_LINE_HEIGHT } from '@documenso/lib/types/field-meta';
@@ -27,8 +27,10 @@ import {
 
 // Can't seem to get the non-any type to work with correct types.
 // Eg Control<{ fontSize?: number } doesn't seem to work when there are required items.
+// react-hook-form >= 7.81 types `Control` invariantly (form-level `validate`), so a
+// `Control<SpecificValues>` is no longer assignable to `Control<any>`.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type FormControlType = Control<any>;
+type FormControlType = any;
 
 export const EditorGenericFontSizeField = ({
   formControl,
