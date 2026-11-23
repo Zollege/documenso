@@ -34,12 +34,12 @@ jobs:
           PR_COUNT=$(curl -s "https://api.github.com/search/issues?q=type:pr+is:open+author:${CREATOR}+repo:${{ github.repository }}" | jq -r '.total_count')
           echo "::set-output name=pr_count::$PR_COUNT"
 
-      - uses: amannn/action-semantic-pull-request@v5
+      - uses: amannn/action-semantic-pull-request@e32d7e603df1aa1ba07e981f2a23455dee596825 # v5
         id: lint_pr_title
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2 (v2.9.4)
         if: always() && (steps.lint_pr_title.outputs.error_message != null)
         with:
           header: pr-title-lint-error
@@ -55,7 +55,7 @@ jobs:
             ```
 
       - if: ${{ steps.lint_pr_title.outputs.error_message == null && steps.check_activity.outputs.is_new == 'false' && steps.count_prs.outputs.pr_count < 2}}
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2 (v2.9.4)
         with:
           header: pr-title-lint-error
           message: |
